@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 09217e9ae263b204080675f79eb641fe
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2655988077585873504
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 170162
+  packageName: Japanese Street
+  packageVersion: 1.6
+  assetPath: Assets/Japanese_Street/Shaders/LODGroup_Street.preset
+  uploadId: 666761

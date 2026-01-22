@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: c4cd83cbba7d0a145a6efc53fb0c4d7d
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 170162
+  packageName: Japanese Street
+  packageVersion: 1.6
+  assetPath: Assets/Japanese_Street/Prefabs/House/AE_House_Type_Standart/AE_Wall_Inner_01.prefab
+  uploadId: 666761

@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: a2fb663173c422d479ab0ae7c7faf8d7
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 170162
+  packageName: Japanese Street
+  packageVersion: 1.6
+  assetPath: Assets/Japanese_Street/Shaders/Leaves.shader
+  uploadId: 666761
