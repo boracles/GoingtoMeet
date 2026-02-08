@@ -36,6 +36,7 @@ Material:
   m_InvalidKeywords:
   - _METALLICSPECGLOSSMAP
   - _MK_ARTISTIC_ANIMATION_STUTTER
+  - _MK_PBS_MAP_0
   - _MK_WRAPPED_DIFFUSE
   - _NORMALMAP
   - _RECEIVESHADOWS_ON
@@ -149,7 +150,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _SpecularMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 0cc4185a0c7fc154aa5eadcd6594ea14, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _SpecularRamp:
@@ -198,7 +199,7 @@ Material:
     - _BlendModePreserveSpecular: 1
     - _BlendSrc: 1
     - _BlendSrcAlpha: 1
-    - _Brightness: 1
+    - _Brightness: 0.95
     - _BumpScale: 1
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
@@ -255,7 +256,7 @@ Material:
     - _RimSize: 1
     - _RimSmoothness: 0.5
     - _RimThresholdOffset: 0.25
-    - _Saturation: 0.5
+    - _Saturation: 0.3
     - _SketchMapScale: 1
     - _Smoothness: 1
     - _SmoothnessTextureChannel: 0
