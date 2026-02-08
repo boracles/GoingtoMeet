@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 8929a322b3a40574bba2e9092e76ef4e
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 187839
+  packageName: Shader Graph Materials V3
+  packageVersion: 1.1
+  assetPath: Assets/Shader Graph Materials V3/Twisted Corridor/Move.cs
+  uploadId: 733466

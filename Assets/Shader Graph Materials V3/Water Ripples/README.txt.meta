@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: ec422522b832995468aa47ce7490b55b
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 187839
+  packageName: Shader Graph Materials V3
+  packageVersion: 1.1
+  assetPath: Assets/Shader Graph Materials V3/Water Ripples/README.txt
+  uploadId: 733466

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 98d68a7377195f949beaeffe883e984e
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 187839
+  packageName: Shader Graph Materials V3
+  packageVersion: 1.1
+  assetPath: Assets/Shader Graph Materials V3/Old Screen/Old Screen Mat.mat
+  uploadId: 733466

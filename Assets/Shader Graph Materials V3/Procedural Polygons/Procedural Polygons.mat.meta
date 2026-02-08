@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 8821bf23a55e4ad4f8b507be5af33f88
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 187839
+  packageName: Shader Graph Materials V3
+  packageVersion: 1.1
+  assetPath: Assets/Shader Graph Materials V3/Procedural Polygons/Procedural Polygons.mat
+  uploadId: 733466

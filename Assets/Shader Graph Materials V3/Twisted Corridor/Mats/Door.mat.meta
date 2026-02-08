@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 34e36f36673ed0042bc7bf2c0aeef12e
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 187839
+  packageName: Shader Graph Materials V3
+  packageVersion: 1.1
+  assetPath: Assets/Shader Graph Materials V3/Twisted Corridor/Mats/Door.mat
+  uploadId: 733466

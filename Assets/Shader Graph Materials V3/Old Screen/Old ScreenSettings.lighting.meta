@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 85581018f2779c041bed2077f480cd4e
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 4890085278179872738
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 187839
+  packageName: Shader Graph Materials V3
+  packageVersion: 1.1
+  assetPath: Assets/Shader Graph Materials V3/Old Screen/Old ScreenSettings.lighting
+  uploadId: 733466

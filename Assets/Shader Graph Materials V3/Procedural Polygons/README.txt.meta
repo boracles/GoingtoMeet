@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 8d96c0e83591f0e40a75889921e0fe84
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 187839
+  packageName: Shader Graph Materials V3
+  packageVersion: 1.1
+  assetPath: Assets/Shader Graph Materials V3/Procedural Polygons/README.txt
+  uploadId: 733466
