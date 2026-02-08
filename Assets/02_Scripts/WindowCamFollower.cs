@@ -38,8 +38,12 @@ public class WindowCamFollower : MonoBehaviour
         // ✅ 상하는 "창문 기준 up"으로 계산 (점프 반응 유지)
         float y = Vector3.Dot(delta, windowPlane.up);
 
-        float sx = Mathf.Clamp((invertX ? -1f : 1f) * x * responseX, -maxShiftX, maxShiftX);
-        float sy = Mathf.Clamp(y * responseY, -maxShiftY, maxShiftY);
+        float sxRaw = (invertX ? -1f : 1f) * x * responseX;
+float syRaw = y * responseY;
+
+float sx = maxShiftX * (2f / Mathf.PI) * Mathf.Atan(sxRaw / maxShiftX);
+float sy = maxShiftY * (2f / Mathf.PI) * Mathf.Atan(syRaw / maxShiftY);
+
 
         // 스무딩
         float t = 1f - Mathf.Exp(-smooth * Time.deltaTime);
