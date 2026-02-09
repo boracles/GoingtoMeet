@@ -15,7 +15,7 @@ Material:
   - _MK_ALBEDO_MAP
   - _MK_COLOR_GRADING_ALBEDO
   - _MK_ENVIRONMENT_REFLECTIONS_AMBIENT
-  - _MK_LIGHT_CEL
+  - _MK_LIGHT_RAMP
   - _MK_NORMAL_MAP
   - _MK_RECEIVE_SHADOWS
   - _MK_SPECULAR_ISOTROPIC
@@ -224,7 +224,7 @@ Material:
     - _IridescenceSize: 1
     - _IridescenceSmoothness: 0.5
     - _IridescenceThresholdOffset: 0
-    - _Light: 1
+    - _Light: 3
     - _LightBands: 4
     - _LightBandsScale: 0.5
     - _LightThreshold: 0.5
