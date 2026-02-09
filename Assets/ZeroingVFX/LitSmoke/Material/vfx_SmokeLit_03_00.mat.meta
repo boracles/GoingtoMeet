@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: d9a357ef836bca04687ad6ca348d5607
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 247674
+  packageName: LitSmoke
+  packageVersion: 1.0
+  assetPath: Assets/ZeroingVFX/LitSmoke/Material/vfx_SmokeLit_03_00.mat
+  uploadId: 577611
