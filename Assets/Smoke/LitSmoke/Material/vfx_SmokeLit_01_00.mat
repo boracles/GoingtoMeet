@@ -19,7 +19,7 @@ Material:
   - _BLACKTOALPHA_ON
   - _EnableValue
   m_LightmapFlags: 0
-  m_EnableInstancingVariants: 0
+  m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap: {}
@@ -112,7 +112,7 @@ Material:
     m_Floats:
     - AlphaGamma: 2
     - PixelSnap: 0
-    - _AlphaGamma: 0
+    - _AlphaGamma: 1
     - _AlphaGramma: 2
     - _BlackToAlpha: 1
     - _BlendDst: 10
@@ -128,7 +128,7 @@ Material:
     - _Cull: 2
     - _CullMode: 2
     - _Cutoff: 0.5
-    - _DepthFade: 0.6
+    - _DepthFade: 0.36
     - _DetailNormalMapScale: 1
     - _Displace: 0
     - _DisplaceXYZ: 0
@@ -164,7 +164,7 @@ Material:
     - _MaskWarp: 0
     - _MaxLit: 9
     - _Metallic: 0
-    - _MinDark: 0.173
+    - _MinDark: 0.7
     - _Mode: 2
     - _OcclusionStrength: 1
     - _Parallax: 0.02
@@ -179,7 +179,7 @@ Material:
     - _SpecularHighlights: 1
     - _SrcBlend: 5
     - _SysTimeFactor: 1
-    - _Transmittance: 0.161
+    - _Transmittance: 1
     - _UVSec: 0
     - _UseVertexLights: 1
     - _Value1Rotate: 0
@@ -192,7 +192,7 @@ Material:
     - _ZWrite: 0
     m_Colors:
     - _CameraFadeParams: {r: 0, g: Infinity, b: 0, a: 0}
-    - _Color: {r: 1, g: 1, b: 1, a: 0.2}
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _ColorBack: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     - _ColorFront: {r: 1, g: 1, b: 1, a: 1}
     - _DisplaceSV: {r: 1, g: 1, b: 0, a: 0}
