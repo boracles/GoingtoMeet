@@ -97,7 +97,7 @@ GameObject:
   - component: {fileID: 4766389331581705649}
   - component: {fileID: 3072731486873774003}
   m_Layer: 0
-  m_Name: Moon Prefab URP
+  m_Name: Moon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
