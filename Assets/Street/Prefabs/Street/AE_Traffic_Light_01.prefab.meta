@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 3fb731a657af904439ee34f0fa5fbf10
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 170162
+  packageName: Japanese Street
+  packageVersion: 1.6
+  assetPath: Assets/Japanese_Street/Prefabs/Street/AE_Traffic_Light_01.prefab
+  uploadId: 666761
