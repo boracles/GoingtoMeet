@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: e6ceeb37e1dce634eaf510dd88aa4739
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 247674
+  packageName: LitSmoke
+  packageVersion: 1.0
+  assetPath: Assets/ZeroingVFX/LitSmoke/Prefab/vfx_SmokeLit_02.prefab
+  uploadId: 577611
