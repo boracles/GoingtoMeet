@@ -269,7 +269,7 @@ Material:
     - _RimSize: 1
     - _RimSmoothness: 0.5
     - _RimThresholdOffset: 0.25
-    - _Saturation: 1
+    - _Saturation: 0
     - _SecondaryFactor: 0
     - _SketchMapScale: 1
     - _Smoothness: 0.931
@@ -312,7 +312,7 @@ Material:
     - _Color: {r: 1, g: 1, b: 1, a: 0.4}
     - _ColorAddSubDiff: {r: 1, g: 0, b: 0, a: 0}
     - _DissolveBorderColor: {r: 1, g: 1, b: 1, a: 1}
-    - _EmissionColor: {r: 1.2326918, g: 0.9051369, b: 0.577582, a: 1}
+    - _EmissionColor: {r: 1.8808651, g: 1.3455874, b: 0.8103097, a: 1}
     - _GoochBrightColor: {r: 1, g: 1, b: 1, a: 1}
     - _GoochDarkColor: {r: 0, g: 0, b: 0, a: 1}
     - _IridescenceColor: {r: 1, g: 1, b: 1, a: 0.5}

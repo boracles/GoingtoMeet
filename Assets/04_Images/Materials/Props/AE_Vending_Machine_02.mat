@@ -205,7 +205,7 @@ Material:
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
     - _ColorGrading: 1
-    - _Contrast: 1
+    - _Contrast: 1.2
     - _Cull: 2
     - _Cutoff: 0.5
     - _DetailAlbedoMapScale: 1
@@ -257,7 +257,7 @@ Material:
     - _RimSize: 1
     - _RimSmoothness: 0.5
     - _RimThresholdOffset: 0.25
-    - _Saturation: 0.5
+    - _Saturation: 0
     - _SketchMapScale: 1
     - _Smoothness: 0.972
     - _SmoothnessTextureChannel: 0
