@@ -3,16 +3,36 @@ using UnityEngine;
 public class CrosswalkSensor : MonoBehaviour
 {
     [Header("Human")]
-    public int humanCount;
+    public int humanCount;   // 기존 방식 유지
+
+    [Header("Cat")]
+    public bool catOnCrosswalk; // 고양이 한 마리
 
     [Header("Ped signal")]
     public TrafficLightController controller;
-    [Tooltip("0=1-4, 1=2-5, 2=3-6 (이 횡단보도 그룹)")]
     public int groupIndex;
+
+    public bool PedGreen()
+    {
+        return controller != null && controller.CanCrossForGroup(groupIndex);
+    }
 
     public bool ShouldStopCars()
     {
-        bool pedGreen = controller != null && controller.CanCrossForGroup(groupIndex);
-        return pedGreen || humanCount > 0;   // ✅ 초록불이면 멈춤 + 사람이 있으면 멈춤
+        bool pedGreen = PedGreen();
+        return pedGreen || humanCount > 0 || catOnCrosswalk;
+    }
+
+    // 고양이 감지(횡단보도 트리거에서)
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.GetComponentInParent<CatController>() != null)
+            catOnCrosswalk = true;
+    }
+
+    void OnTriggerExit(Collider other)
+    {
+        if (other.GetComponentInParent<CatController>() != null)
+            catOnCrosswalk = false;
     }
 }

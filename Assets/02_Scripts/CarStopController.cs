@@ -7,6 +7,12 @@ public class CarStopController : MonoBehaviour
     CarBumper bumper;
     CarLoop loop;
 
+    [Header("Horn")]
+    public AudioSource hornSource;
+    public AudioClip hornClip;
+    public float hornCooldown = 1.2f;
+    float nextHornTime;
+
     void Awake()
     {
         loop = GetComponent<CarLoop>();
@@ -22,5 +28,14 @@ public class CarStopController : MonoBehaviour
     public void SetBlockedByCrosswalk(bool v)
     {
         blockedByCrosswalk = v;
+    }
+
+    public void Honk()
+    {
+        if (!hornClip) return;
+        if (Time.time < nextHornTime) return;
+
+        nextHornTime = Time.time + hornCooldown;
+        if (hornSource) hornSource.PlayOneShot(hornClip);
     }
 }
