@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 29cf3827a643d034484a6a00d5dc055b
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 276564
+  packageName: URP Moon 16K
+  packageVersion: 4.0
+  assetPath: Assets/URP Moon 16K/Shared files/Planet Rotation Animator.controller
+  uploadId: 852122
