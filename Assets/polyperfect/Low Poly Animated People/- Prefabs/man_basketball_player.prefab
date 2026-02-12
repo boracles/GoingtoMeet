@@ -389,8 +389,8 @@ GameObject:
   - component: {fileID: 7327992711230284137}
   - component: {fileID: 2721286059689450067}
   - component: {fileID: 1010288125031777929}
+  - component: {fileID: 3407897652090702550}
   - component: {fileID: 7972387431936557021}
-  - component: {fileID: 3409996512170021480}
   - component: {fileID: 8346474120439266390}
   m_Layer: 0
   m_Name: man_basketball_player
@@ -455,6 +455,28 @@ MonoBehaviour:
   actionInterval: {x: 18, y: 45}
   actionDuration: {x: 0.8, y: 1.6}
   phoneChance: 0.6
+  debugLog: 0
+--- !u!114 &3407897652090702550
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 820048025815226603}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03d0a7995d1e884478d380d3a2a4eaed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  radiusRange: {x: 0.28, y: 0.34}
+  height: 1.7
+  speedRange: {x: 0.6, y: 0.8}
+  accelRange: {x: 4, y: 8}
+  angularSpeed: 240
+  avoidance: 2
+  priorityRange: {x: 30, y: 70}
+  stoppingDistanceRange: {x: 0.05, y: 0.2}
+  autoBraking: 0
 --- !u!114 &7972387431936557021
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -470,31 +492,6 @@ MonoBehaviour:
   wanderRadius: 100
   minDistance: 10
   maxTries: 10
---- !u!143 &3409996512170021480
-CharacterController:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 820048025815226603}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Height: 1.8
-  m_Radius: 0.3
-  m_SlopeLimit: 45
-  m_StepOffset: 0.3
-  m_SkinWidth: 0.08
-  m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0.99, z: 0}
 --- !u!195 &8346474120439266390
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -514,8 +511,8 @@ NavMeshAgent:
   m_AutoBraking: 1
   m_AutoRepath: 1
   m_Height: 2
-  m_BaseOffset: 0.1
-  m_WalkableMask: 4294967295
+  m_BaseOffset: 0
+  m_WalkableMask: 1
   m_ObstacleAvoidanceType: 4
 --- !u!1 &907204861752627185
 GameObject:

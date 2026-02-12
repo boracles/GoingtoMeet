@@ -3050,6 +3050,7 @@ GameObject:
   - component: {fileID: 3422546497511845004}
   - component: {fileID: 3965995493186101372}
   - component: {fileID: 3534711096514871562}
+  - component: {fileID: 409667870988188781}
   - component: {fileID: 7093120032328463936}
   - component: {fileID: 6446418735025087322}
   m_Layer: 0
@@ -3138,6 +3139,27 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &409667870988188781
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6802174756276902510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03d0a7995d1e884478d380d3a2a4eaed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  radiusRange: {x: 0.28, y: 0.34}
+  height: 1.7
+  speedRange: {x: 0.6, y: 0.8}
+  accelRange: {x: 4, y: 8}
+  angularSpeed: 240
+  avoidance: 2
+  priorityRange: {x: 30, y: 70}
+  stoppingDistanceRange: {x: 0.05, y: 0.2}
+  autoBraking: 0
 --- !u!114 &7093120032328463936
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3150,13 +3172,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a5b5edc77bb60464e8ca48c057c36024, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  forceController: {fileID: 0}
   speedRange: {x: 0.9, y: 1.1}
   timeKickRange: {x: 0, y: 0.25}
   actionInterval: {x: 18, y: 45}
   actionDuration: {x: 0.8, y: 1.6}
   phoneChance: 0.6
-  minCooldownAfterAction: 2
+  debugLog: 0
 --- !u!195 &6446418735025087322
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -3176,7 +3197,7 @@ NavMeshAgent:
   m_AutoBraking: 1
   m_AutoRepath: 1
   m_Height: 2
-  m_BaseOffset: 0.1
+  m_BaseOffset: 0
   m_WalkableMask: 1
   m_ObstacleAvoidanceType: 4
 --- !u!1 &6833332376744741784

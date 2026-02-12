@@ -23,6 +23,13 @@ public class CrowdNavTuning : MonoBehaviour
     [SerializeField] Vector2 stoppingDistanceRange = new Vector2(0.05f, 0.2f);
     [SerializeField] bool autoBraking = false;
 
+    [Header("NavMesh Recovery")]
+    [SerializeField] bool enableSnapBack = true;
+    [SerializeField] float snapSearchRadius = 2.0f;
+    [SerializeField] float snapCooldown = 0.5f;
+
+    float _nextSnapTime;
+
     void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -44,5 +51,22 @@ public class CrowdNavTuning : MonoBehaviour
         // 정체 완화
         agent.stoppingDistance = Random.Range(stoppingDistanceRange.x, stoppingDistanceRange.y);
         agent.autoBraking = autoBraking;
+    }
+
+    void LateUpdate()
+    {
+        if (!enableSnapBack || agent == null) return;
+        if (Time.time < _nextSnapTime) return;
+
+        // NavMesh 밖으로 나갔을 때만 복구
+        if (!agent.isOnNavMesh)
+        {
+            if (NavMesh.SamplePosition(transform.position, out var hit, snapSearchRadius, NavMesh.AllAreas))
+            {
+                agent.Warp(hit.position);
+                agent.ResetPath(); // 경로 꼬임 방지
+                _nextSnapTime = Time.time + snapCooldown;
+            }
+        }
     }
 }

@@ -2510,13 +2510,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   radiusRange: {x: 0.28, y: 0.34}
   height: 1.7
-  speedRange: {x: 1.1, y: 1.5}
+  speedRange: {x: 0.6, y: 0.8}
   accelRange: {x: 4, y: 8}
   angularSpeed: 240
   avoidance: 2
   priorityRange: {x: 30, y: 70}
   stoppingDistanceRange: {x: 0.05, y: 0.2}
   autoBraking: 0
+  enableSnapBack: 1
+  snapSearchRadius: 2
+  snapCooldown: 0.5
 --- !u!114 &8338698101384512122
 MonoBehaviour:
   m_ObjectHideFlags: 0
