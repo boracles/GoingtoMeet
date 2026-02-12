@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3381617222553424414}
   - component: {fileID: 5127935611978914836}
   - component: {fileID: 7417385151212471711}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Spot Light (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -132,7 +132,7 @@ GameObject:
   - component: {fileID: 5533844449432735042}
   - component: {fileID: 3627913159121817638}
   - component: {fileID: 6366912557976623592}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Spot Light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -253,7 +253,7 @@ GameObject:
   - component: {fileID: 8322819922527800326}
   - component: {fileID: 8322819922529094694}
   - component: {fileID: 8322819922530225894}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: AE_Minivan_Street_LOD3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -341,7 +341,7 @@ GameObject:
   - component: {fileID: 8322819922527800328}
   - component: {fileID: 8322819922529094696}
   - component: {fileID: 8322819922530225896}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: AE_Minivan_Street_LOD2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -429,7 +429,7 @@ GameObject:
   - component: {fileID: 8322819922527800330}
   - component: {fileID: 8322819922529094698}
   - component: {fileID: 8322819922530225898}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: AE_Minivan_Street_LOD1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -517,8 +517,7 @@ GameObject:
   - component: {fileID: 8322819922527800332}
   - component: {fileID: 8322819922529094700}
   - component: {fileID: 8322819922530225900}
-  - component: {fileID: 922781984182580589}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: AE_Minivan_Street_LOD0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -575,7 +574,7 @@ MeshRenderer:
   m_Materials:
   - {fileID: 2100000, guid: 933ac1ea83767c5428abbc9b20122bb1, type: 2}
   - {fileID: 2100000, guid: 56e04dd1df250f043a9f89f38fe820d5, type: 2}
-  - {fileID: 2100000, guid: 7daf5052096ec8e4e939c05f653655ef, type: 2}
+  - {fileID: 2100000, guid: 543b4c7197158844389d590a76253846, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -597,27 +596,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &922781984182580589
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8322819922528292908}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1.9586703, y: 1.8960489, z: 3.4451346}
-  m_Center: {x: 0, y: 0.9348027, z: 0.08516061}
 --- !u!1 &8322819922528292910
 GameObject:
   m_ObjectHideFlags: 0
@@ -628,8 +606,12 @@ GameObject:
   m_Component:
   - component: {fileID: 8322819922527800334}
   - component: {fileID: 8322819922513008814}
+  - component: {fileID: 5483554279948052118}
+  - component: {fileID: 7206737339742148738}
   - component: {fileID: 8639110340344778038}
-  m_Layer: 0
+  - component: {fileID: 1221966086960209188}
+  - component: {fileID: 4247510228020147695}
+  m_Layer: 7
   m_Name: AE_Minivan_Street
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -686,6 +668,36 @@ LODGroup:
     renderers:
     - renderer: {fileID: 8322819922530225894}
   m_Enabled: 1
+--- !u!114 &5483554279948052118
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8322819922528292910}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3dede6fe4ba979647983d9de1c6e5088, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &7206737339742148738
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8322819922528292910}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d53ea00b52e51674b8a6aaee5cd11fce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  carLayer:
+    serializedVersion: 2
+    m_Bits: 128
+  checkDistance: 6
+  stopDistance: 2.5
+  rayHeight: 0.6
 --- !u!114 &8639110340344778038
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -714,5 +726,53 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   speed: 6
-  turnSpeed: 5
+  turnSpeed: 4
   arriveDist: 1.2
+--- !u!65 &1221966086960209188
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8322819922528292910}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.58, y: 1.8749657, z: 3.48}
+  m_Center: {x: 0, y: 0.92286515, z: 0.13}
+--- !u!54 &4247510228020147695
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8322819922528292910}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0

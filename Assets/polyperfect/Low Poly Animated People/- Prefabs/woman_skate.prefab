@@ -200,11 +200,11 @@ GameObject:
   m_Component:
   - component: {fileID: 1069003549940519913}
   - component: {fileID: 3454583323852318080}
-  - component: {fileID: 8730754457027597180}
   - component: {fileID: 279800824115749461}
   - component: {fileID: 4171489856515878174}
   - component: {fileID: 5362685067077134102}
   - component: {fileID: 8554557507057698633}
+  - component: {fileID: 4593175972634611143}
   m_Layer: 0
   m_Name: woman_skate
   m_TagString: Untagged
@@ -251,31 +251,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!143 &8730754457027597180
-CharacterController:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 646227915293341282}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Height: 1.8
-  m_Radius: 0.3
-  m_SlopeLimit: 45
-  m_StepOffset: 0.3
-  m_SkinWidth: 0.08
-  m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0.99, z: 0}
 --- !u!114 &279800824115749461
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -297,6 +272,9 @@ MonoBehaviour:
   priorityRange: {x: 30, y: 70}
   stoppingDistanceRange: {x: 0.05, y: 0.2}
   autoBraking: 0
+  enableSnapBack: 1
+  snapSearchRadius: 2
+  snapCooldown: 0.5
 --- !u!114 &4171489856515878174
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -352,6 +330,29 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!136 &4593175972634611143
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 646227915293341282}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.2
+  m_Height: 2
+  m_Direction: 1
+  m_Center: {x: 0, y: 1, z: 0}
 --- !u!1 &801214065368956020
 GameObject:
   m_ObjectHideFlags: 0

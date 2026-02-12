@@ -3690,12 +3690,13 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 694475599325485077}
-  - component: {fileID: 8832429804992322892}
   - component: {fileID: 8063546307389370818}
   - component: {fileID: 2154047356008491243}
   - component: {fileID: 1530102565139140335}
   - component: {fileID: 8392373605595376810}
   - component: {fileID: 8915410007095807404}
+  - component: {fileID: 8952684856170647434}
+  - component: {fileID: 5543367071981756049}
   m_Layer: 0
   m_Name: girl_casual_shorts
   m_TagString: Untagged
@@ -3720,31 +3721,6 @@ Transform:
   - {fileID: 9032560578379902861}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!143 &8832429804992322892
-CharacterController:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9063954207684994692}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Height: 1.8
-  m_Radius: 0.3
-  m_SlopeLimit: 45
-  m_StepOffset: 0.3
-  m_SkinWidth: 0.08
-  m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0.99, z: 0}
 --- !u!114 &8063546307389370818
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3814,13 +3790,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   radiusRange: {x: 0.28, y: 0.34}
   height: 1.7
-  speedRange: {x: 1.1, y: 1.5}
+  speedRange: {x: 0.6, y: 0.8}
   accelRange: {x: 4, y: 8}
   angularSpeed: 240
   avoidance: 2
   priorityRange: {x: 30, y: 70}
   stoppingDistanceRange: {x: 0.05, y: 0.2}
   autoBraking: 0
+  enableSnapBack: 1
+  snapSearchRadius: 2
+  snapCooldown: 0.5
 --- !u!195 &8915410007095807404
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -3843,6 +3822,56 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!136 &8952684856170647434
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9063954207684994692}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.2
+  m_Height: 2
+  m_Direction: 1
+  m_Center: {x: 0, y: 1, z: 0}
+--- !u!54 &5543367071981756049
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9063954207684994692}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &9219081639408393215
 GameObject:
   m_ObjectHideFlags: 0

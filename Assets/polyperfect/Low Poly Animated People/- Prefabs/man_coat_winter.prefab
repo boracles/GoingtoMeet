@@ -201,9 +201,10 @@ GameObject:
   - component: {fileID: 3342580665324978141}
   - component: {fileID: 4791124604129434571}
   - component: {fileID: 4250774477011463009}
-  - component: {fileID: 2900296725198512712}
   - component: {fileID: 1211001546220916038}
   - component: {fileID: 7430960524580781655}
+  - component: {fileID: 8434951705651413406}
+  - component: {fileID: 1683310686572074659}
   m_Layer: 0
   m_Name: man_coat_winter
   m_TagString: Untagged
@@ -283,31 +284,6 @@ MonoBehaviour:
   wanderRadius: 100
   minDistance: 10
   maxTries: 10
---- !u!143 &2900296725198512712
-CharacterController:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 872735260759914935}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Height: 1.8
-  m_Radius: 0.3
-  m_SlopeLimit: 45
-  m_StepOffset: 0.3
-  m_SkinWidth: 0.08
-  m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0.99, z: 0}
 --- !u!114 &1211001546220916038
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -329,6 +305,9 @@ MonoBehaviour:
   priorityRange: {x: 30, y: 70}
   stoppingDistanceRange: {x: 0.05, y: 0.2}
   autoBraking: 0
+  enableSnapBack: 1
+  snapSearchRadius: 2
+  snapCooldown: 0.5
 --- !u!195 &7430960524580781655
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -351,6 +330,56 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!54 &8434951705651413406
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 872735260759914935}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!136 &1683310686572074659
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 872735260759914935}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.2
+  m_Height: 2
+  m_Direction: 1
+  m_Center: {x: 0, y: 1, z: 0}
 --- !u!1 &1051541011694481157
 GameObject:
   m_ObjectHideFlags: 0

@@ -1479,8 +1479,10 @@ GameObject:
   - component: {fileID: 7271563434390490715}
   - component: {fileID: 5692190940630980204}
   - component: {fileID: 1308596388906078935}
-  - component: {fileID: 7175780166150186341}
   - component: {fileID: 7470572528113972954}
+  - component: {fileID: 6713526283162191095}
+  - component: {fileID: 6215419511365548830}
+  - component: {fileID: 4326529987693435469}
   m_Layer: 0
   m_Name: woman_naval_officer
   m_TagString: Untagged
@@ -1554,38 +1556,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a5b5edc77bb60464e8ca48c057c36024, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  forceController: {fileID: 0}
   speedRange: {x: 0.95, y: 1.05}
   timeKickRange: {x: 0, y: 0.2}
   actionInterval: {x: 25, y: 60}
   actionDuration: {x: 0.7, y: 1.4}
   phoneChance: 0.6
-  minCooldownAfterAction: 2
---- !u!143 &7175780166150186341
-CharacterController:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5342370406094091175}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Height: 1.8
-  m_Radius: 0.3
-  m_SlopeLimit: 45
-  m_StepOffset: 0.3
-  m_SkinWidth: 0.08
-  m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0.99, z: 0}
+  debugLog: 0
 --- !u!195 &7470572528113972954
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -1608,6 +1584,80 @@ NavMeshAgent:
   m_BaseOffset: 0.1
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &6713526283162191095
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5342370406094091175}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03d0a7995d1e884478d380d3a2a4eaed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  radiusRange: {x: 0.28, y: 0.34}
+  height: 1.7
+  speedRange: {x: 0.6, y: 0.8}
+  accelRange: {x: 4, y: 8}
+  angularSpeed: 240
+  avoidance: 2
+  priorityRange: {x: 30, y: 70}
+  stoppingDistanceRange: {x: 0.05, y: 0.2}
+  autoBraking: 0
+  enableSnapBack: 1
+  snapSearchRadius: 2
+  snapCooldown: 0.5
+--- !u!136 &6215419511365548830
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5342370406094091175}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.2
+  m_Height: 2
+  m_Direction: 1
+  m_Center: {x: 0, y: 1, z: 0}
+--- !u!54 &4326529987693435469
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5342370406094091175}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &5342594034852911393
 GameObject:
   m_ObjectHideFlags: 0
