@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!221 &22100000
+AnimatorOverrideController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Override_Sitting_Woman
+  m_Controller: {fileID: 9100000, guid: 62d9d5523b73c7d4d94fce94b9a8dd7f, type: 2}
+  m_Clips:
+  - m_OriginalClip: {fileID: 7400000, guid: cfa835ec428fbc04487000a50aa4cf1b, type: 3}
+    m_OverrideClip: {fileID: 7400044, guid: d83d395fd464b67438cebe05f5bfd990, type: 3}
+  - m_OriginalClip: {fileID: 7400000, guid: 4d10202860dceb04983fc2b2f7484e3b, type: 3}
+    m_OverrideClip: {fileID: 7400000, guid: 4d10202860dceb04983fc2b2f7484e3b, type: 3}
+  - m_OriginalClip: {fileID: 7400000, guid: f8b68f5841b9ede44aafb7d0fa71dc2e, type: 3}
+    m_OverrideClip: {fileID: 7400000, guid: f8b68f5841b9ede44aafb7d0fa71dc2e, type: 3}
+  - m_OriginalClip: {fileID: 3098471957870246762, guid: dd9c0466e0a891f44a2b4d34097fd396, type: 3}
+    m_OverrideClip: {fileID: 7400090, guid: d83d395fd464b67438cebe05f5bfd990, type: 3}
+  - m_OriginalClip: {fileID: -5832668268846465755, guid: 9040d2266ab851d41b05afbbbcfa77ad, type: 3}
+    m_OverrideClip: {fileID: -5832668268846465755, guid: 8343f2dedfa950047a0540eba6648433, type: 3}
