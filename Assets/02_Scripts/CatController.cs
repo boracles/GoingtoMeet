@@ -30,6 +30,7 @@ public class CatController : MonoBehaviour
     public float sprintMultiplier = 1.6f;
     public float gravity = -20f;
 
+
     CharacterController controller;
     float verticalVelocity;
 
@@ -91,7 +92,7 @@ public class CatController : MonoBehaviour
         transform.Rotate(0f, mx, 0f);
 
         // ✅ Mouse Y = 고개 Pitch만
-        if (!invertY) my = -my;
+        if (invertY) my = -my;
         pitch += my;
         pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
 
