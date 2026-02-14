@@ -1,4 +1,5 @@
 {
+    "version": 1,
     "name": "InputSystem_Actions",
     "maps": [
         {
@@ -990,6 +991,54 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "Tracker",
+            "id": "cb7dd0d0-f489-4990-b534-d20c3b0a5a14",
+            "actions": [
+                {
+                    "name": "Position",
+                    "type": "Value",
+                    "id": "20a270b9-8e9a-4cac-9d05-092895e07f88",
+                    "expectedControlType": "Vector3",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Rotation",
+                    "type": "Value",
+                    "id": "13466025-fc2d-4b28-9c57-ee7b393a4362",
+                    "expectedControlType": "Quaternion",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "c668d845-f557-4dba-83e0-deed9b279424",
+                    "path": "<ViveXRTracker>/devicePosition",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";XRTraker",
+                    "action": "Position",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "fcfc38d1-fd28-4880-a4d1-2dbf432ff71a",
+                    "path": "<ViveXRTracker>/deviceRotation",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";XRTraker",
+                    "action": "Rotation",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": [
@@ -1048,6 +1097,17 @@
             "devices": [
                 {
                     "devicePath": "<XRController>",
+                    "isOptional": false,
+                    "isOR": false
+                }
+            ]
+        },
+        {
+            "name": "XRTraker",
+            "bindingGroup": "XRTraker",
+            "devices": [
+                {
+                    "devicePath": "<ViveXRTracker>",
                     "isOptional": false,
                     "isOR": false
                 }

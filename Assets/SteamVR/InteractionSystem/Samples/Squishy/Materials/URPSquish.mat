@@ -156,6 +156,7 @@ Material:
     - _Surface: 0
     - _UVSec: 0
     - _WorkflowMode: 0
+    - _XRMotionVectorsPass: 1
     - _ZWrite: 1
     m_Colors:
     - <noninit>: {r: 0, g: 2.0183642, b: 1e-45, a: 6.480812e-26}
