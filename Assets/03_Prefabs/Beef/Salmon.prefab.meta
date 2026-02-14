@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 3a942186212b855458c2016ab101203e
+timeCreated: 1525970439
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 118683
+  packageName: Food Items - Proteins Pack
+  packageVersion: 1.0
+  assetPath: Assets/LockemReality/FoodItems-Proteins/Prefabs/Salmon.prefab
+  uploadId: 246153

@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 5e86192caab646c4a9aa86b6d966bb0a
+timeCreated: 1525970440
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 118683
+  packageName: Food Items - Proteins Pack
+  packageVersion: 1.0
+  assetPath: Assets/LockemReality/FoodItems-Proteins/Prefabs/SalmonSteak.prefab
+  uploadId: 246153

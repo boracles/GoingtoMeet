@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 59dabd515b6c5434888ab13c56634820
+timeCreated: 1525970417
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 118683
+  packageName: Food Items - Proteins Pack
+  packageVersion: 1.0
+  assetPath: Assets/LockemReality/FoodItems-Proteins/Prefabs/CanadianBacon.prefab
+  uploadId: 246153

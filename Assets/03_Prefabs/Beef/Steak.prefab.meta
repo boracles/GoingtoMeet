@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 7418fa3ecd7275543b6d4940823a1d5d
+timeCreated: 1525970427
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 118683
+  packageName: Food Items - Proteins Pack
+  packageVersion: 1.0
+  assetPath: Assets/LockemReality/FoodItems-Proteins/Prefabs/Steak.prefab
+  uploadId: 246153

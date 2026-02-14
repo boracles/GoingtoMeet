@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 65b7713faeace974d992153f87fefbd3
+timeCreated: 1525970425
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 118683
+  packageName: Food Items - Proteins Pack
+  packageVersion: 1.0
+  assetPath: Assets/LockemReality/FoodItems-Proteins/Prefabs/NewYorkStripSteak.prefab
+  uploadId: 246153

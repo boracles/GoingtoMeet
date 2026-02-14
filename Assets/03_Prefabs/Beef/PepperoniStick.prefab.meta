@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 1513ffea4682941468a3a636666fdca2
+timeCreated: 1525970431
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 118683
+  packageName: Food Items - Proteins Pack
+  packageVersion: 1.0
+  assetPath: Assets/LockemReality/FoodItems-Proteins/Prefabs/PepperoniStick.prefab
+  uploadId: 246153

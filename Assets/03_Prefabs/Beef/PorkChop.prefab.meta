@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: a992eb6bd3a214d4dbc906d8e9fcdbae
+timeCreated: 1525970436
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 118683
+  packageName: Food Items - Proteins Pack
+  packageVersion: 1.0
+  assetPath: Assets/LockemReality/FoodItems-Proteins/Prefabs/PorkChop.prefab
+  uploadId: 246153

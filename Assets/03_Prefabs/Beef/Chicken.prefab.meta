@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 6bbb21fa41bb52942a2b6391f8eab020
+timeCreated: 1525970419
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 118683
+  packageName: Food Items - Proteins Pack
+  packageVersion: 1.0
+  assetPath: Assets/LockemReality/FoodItems-Proteins/Prefabs/Chicken.prefab
+  uploadId: 246153
