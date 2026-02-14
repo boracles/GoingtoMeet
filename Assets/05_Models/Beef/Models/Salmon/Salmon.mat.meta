@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 7bc9bfc308f61b24e9695fdd5e10940a
+timeCreated: 1488382732
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: ingredients
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 118683
+  packageName: Food Items - Proteins Pack
+  packageVersion: 1.0
+  assetPath: Assets/LockemReality/FoodItems-Proteins/Models/Salmon/Salmon.mat
+  uploadId: 246153

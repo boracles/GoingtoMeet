@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 3c341abd3a432b040a0a81852ef73197
+timeCreated: 1493762795
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: ingredients
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 118683
+  packageName: Food Items - Proteins Pack
+  packageVersion: 1.0
+  assetPath: Assets/LockemReality/FoodItems-Proteins/Models/NewYorkStripSteak/NewYorkStripSteak.mat
+  uploadId: 246153

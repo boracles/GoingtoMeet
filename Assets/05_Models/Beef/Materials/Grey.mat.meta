@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: a5af2c81fe51fce4ea797724040c69c4
+timeCreated: 1525980854
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 118683
+  packageName: Food Items - Proteins Pack
+  packageVersion: 1.0
+  assetPath: Assets/LockemReality/FoodItems-Proteins/Materials/Grey.mat
+  uploadId: 246153

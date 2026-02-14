@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 996038f1db6f53c44b9c0c81005128da
+timeCreated: 1488468403
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: ingredients
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 118683
+  packageName: Food Items - Proteins Pack
+  packageVersion: 1.0
+  assetPath: Assets/LockemReality/FoodItems-Proteins/Models/Normal Steak/Steak.mat
+  uploadId: 246153

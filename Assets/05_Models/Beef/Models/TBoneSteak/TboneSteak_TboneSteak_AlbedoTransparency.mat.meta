@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 3c225d90c0848e24f80532a967fdeb77
+timeCreated: 1491415825
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: ingredients
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 118683
+  packageName: Food Items - Proteins Pack
+  packageVersion: 1.0
+  assetPath: Assets/LockemReality/FoodItems-Proteins/Models/TBoneSteak/TboneSteak_TboneSteak_AlbedoTransparency.mat
+  uploadId: 246153

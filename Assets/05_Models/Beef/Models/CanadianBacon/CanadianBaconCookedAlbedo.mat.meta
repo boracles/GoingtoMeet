@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 46911b2b82216234bb609d3f95520762
+timeCreated: 1491427578
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: ingredients
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 118683
+  packageName: Food Items - Proteins Pack
+  packageVersion: 1.0
+  assetPath: Assets/LockemReality/FoodItems-Proteins/Models/CanadianBacon/CanadianBaconCookedAlbedo.mat
+  uploadId: 246153

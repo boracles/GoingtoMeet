@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: d7050c304cd20c64cb3e5e72e8251bfd
+timeCreated: 1490996445
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: ingredients
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 118683
+  packageName: Food Items - Proteins Pack
+  packageVersion: 1.0
+  assetPath: Assets/LockemReality/FoodItems-Proteins/Models/PorkChop/PorkChopMat.mat
+  uploadId: 246153

@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 209639312ecb2a145a4592191fdf340d
+timeCreated: 1525969027
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 118683
+  packageName: Food Items - Proteins Pack
+  packageVersion: 1.0
+  assetPath: Assets/LockemReality/FoodItems-Proteins/Models/ChickenBreast/ChickenBreast.mat
+  uploadId: 246153

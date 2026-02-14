@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 680fd7be19853754581e07343d6b2751
+timeCreated: 1487965591
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: ingredients
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 118683
+  packageName: Food Items - Proteins Pack
+  packageVersion: 1.0
+  assetPath: Assets/LockemReality/FoodItems-Proteins/Models/Bacon/Bacon.mat
+  uploadId: 246153
