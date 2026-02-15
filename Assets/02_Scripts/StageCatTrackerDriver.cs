@@ -34,11 +34,11 @@ public class StageCatTrackerDriver : MonoBehaviour
     // =========================
     public enum TwistAxis { LocalX, LocalY, LocalZ }
 
-    [Header("Rotation (Twist Axis)")]
+    [Header("Body Yaw (Twist Axis)")]
     public bool applyYawRotation = true;
 
     [Tooltip("네 트래커에서 '좌우 회전'으로 쓰고 싶은 로컬 축")]
-    public TwistAxis yawAxis = TwistAxis.LocalZ;   // ✅ 네가 말한 “local Z축 기준”이면 LocalZ
+    public TwistAxis yawAxis = TwistAxis.LocalZ;
 
     public float yawGain = 1f;
     public bool invertYaw = false;
@@ -50,6 +50,28 @@ public class StageCatTrackerDriver : MonoBehaviour
     [Header("Yaw Safety")]
     public float maxYawRateDegPerSec = 360f;
     public float yawDeadzoneDeg = 0.5f;
+
+    // =========================
+    // ✅ Head Pitch (Tracker Local X -> Head Local X)
+    // =========================
+    [Header("Head Pitch (Tracker Local X -> Head Local X)")]
+    public Transform head;                    // ✅ 고양이 머리 Transform (인스펙터에 할당)
+    public bool applyHeadPitch = true;
+
+    public float pitchGain = 1f;
+    public bool invertPitch = false;
+    public float pitchOffsetDegrees = 0f;
+
+    [Tooltip("머리 피치 제한(도). 예: 아래 -25, 위 +20")]
+    public float pitchMinDeg = -25f;
+    public float pitchMaxDeg = 20f;
+
+    [Tooltip("0이면 즉시, >0이면 부드럽게")]
+    public float headSmooth = 18f;
+
+    [Header("Pitch Safety")]
+    public float maxPitchRateDegPerSec = 360f;
+    public float pitchDeadzoneDeg = 0.3f;
 
     // ===== internals =====
     Vector3 trackerOriginPos;
@@ -68,6 +90,11 @@ public class StageCatTrackerDriver : MonoBehaviour
     Quaternion trackerOriginLocalRot;
     float catStartYaw;
     float filteredYaw;
+
+    // head pitch state
+    Quaternion headStartLocalRot;
+    float headStartPitch;
+    float filteredPitch;
 
     void OnEnable()
     {
@@ -91,23 +118,17 @@ public class StageCatTrackerDriver : MonoBehaviour
     {
         axisLocal.Normalize();
 
-        // q = [w, v], v = (x,y,z)
         Vector3 v = new Vector3(q.x, q.y, q.z);
-
-        // v를 axis에 투영한 성분만 남기면 twist의 벡터부가 됨
         Vector3 proj = Vector3.Project(v, axisLocal);
 
         Quaternion twist = new Quaternion(proj.x, proj.y, proj.z, q.w);
         twist = NormalizeSafe(twist);
 
-        // twist 각도 추출 (signed)
         float angleRad = 2f * Mathf.Atan2(new Vector3(twist.x, twist.y, twist.z).magnitude, twist.w);
         float angleDeg = angleRad * Mathf.Rad2Deg;
 
-        // 0~360을 -180~180으로
         if (angleDeg > 180f) angleDeg -= 360f;
 
-        // 부호 결정: twist의 벡터부가 축과 같은 방향이면 +, 반대면 -
         float sign = Mathf.Sign(Vector3.Dot(new Vector3(twist.x, twist.y, twist.z), axisLocal));
         if (sign == 0f) sign = 1f;
 
@@ -120,6 +141,12 @@ public class StageCatTrackerDriver : MonoBehaviour
         if (mag < 1e-8f) return Quaternion.identity;
         float inv = 1f / mag;
         return new Quaternion(q.x * inv, q.y * inv, q.z * inv, q.w * inv);
+    }
+
+    static float NormalizeAngle180(float deg)
+    {
+        deg = Mathf.Repeat(deg + 180f, 360f) - 180f;
+        return deg;
     }
 
     void LateUpdate()
@@ -160,12 +187,18 @@ public class StageCatTrackerDriver : MonoBehaviour
             basisForward = Vector3.forward;
             basisRight = Vector3.right;
 
-            // ✅ 회전 원점
-            if (applyYawRotation)
+            // ✅ 회전 원점(바디 yaw)
+            trackerOriginLocalRot = tracker.localRotation;
+            catStartYaw = transform.eulerAngles.y;
+            filteredYaw = catStartYaw;
+
+            // ✅ 머리 원점(피치)
+            if (head)
             {
-                trackerOriginLocalRot = tracker.localRotation;
-                catStartYaw = transform.eulerAngles.y;
-                filteredYaw = catStartYaw;
+                headStartLocalRot = head.localRotation;
+                // head의 현재 local X를 시작값으로 저장
+                headStartPitch = NormalizeAngle180(head.localEulerAngles.x);
+                filteredPitch = headStartPitch;
             }
 
             ready = true;
@@ -214,7 +247,7 @@ public class StageCatTrackerDriver : MonoBehaviour
             transform.position = targetPos;
         }
 
-        // ===== 회전 (선택 축에 대한 twist만) =====
+        // ===== 바디 Yaw (선택 축에 대한 twist만) =====
         if (applyYawRotation)
         {
             Quaternion rel = Quaternion.Inverse(trackerOriginLocalRot) * tracker.localRotation;
@@ -241,6 +274,38 @@ public class StageCatTrackerDriver : MonoBehaviour
             }
 
             transform.rotation = Quaternion.Euler(0f, filteredYaw, 0f);
+        }
+
+        // ===== 머리 Pitch (트래커 LocalX twist -> head LocalX) =====
+        if (applyHeadPitch && head)
+        {
+            Quaternion rel = Quaternion.Inverse(trackerOriginLocalRot) * tracker.localRotation;
+
+            // ✅ 트래커 로컬 X축에 대한 twist만 = pitch 입력으로 사용
+            float pitchDelta = ExtractTwistDegrees(rel, Vector3.right);
+
+            if (invertPitch) pitchDelta = -pitchDelta;
+            if (Mathf.Abs(pitchDelta) < pitchDeadzoneDeg) pitchDelta = 0f;
+
+            float desiredPitch = headStartPitch + (pitchDelta * pitchGain) + pitchOffsetDegrees;
+            desiredPitch = Mathf.Clamp(desiredPitch, pitchMinDeg, pitchMaxDeg);
+
+            float maxStep = maxPitchRateDegPerSec * Time.deltaTime;
+            float newPitch = Mathf.MoveTowardsAngle(filteredPitch, desiredPitch, maxStep);
+
+            if (headSmooth > 0f)
+            {
+                float t = 1f - Mathf.Exp(-headSmooth * Time.deltaTime);
+                filteredPitch = Mathf.LerpAngle(filteredPitch, newPitch, t);
+            }
+            else
+            {
+                filteredPitch = newPitch;
+            }
+
+            // ✅ Euler로 x만 덮지 말고: 시작 로컬 회전에 X축 회전만 곱해서 적용
+            float deltaPitch = filteredPitch - headStartPitch;  // 시작 대비 변화량
+            head.localRotation = headStartLocalRot * Quaternion.AngleAxis(deltaPitch, Vector3.right);
         }
     }
 }
