@@ -18,6 +18,9 @@ public class StageCatTrackerDriver : MonoBehaviour
     public bool invertX = false;
     public bool invertZ = true;
 
+    [Tooltip("✅ 앞/뒤로 움직였는데 좌/우로 간다면 켜라 (X/Z 스왑)")]
+    public bool swapXZ = false;
+
     [Header("Smoothing")]
     public float posSmooth = 18f;
 
@@ -30,7 +33,7 @@ public class StageCatTrackerDriver : MonoBehaviour
     Vector3 catStartPos;
     float catY;
 
-    // ✅ “기준축”을 시작 순간에 고정
+    // 기준축
     Vector3 basisRight;
     Vector3 basisForward;
 
@@ -44,14 +47,6 @@ public class StageCatTrackerDriver : MonoBehaviour
         ready = false;
         stableFrames = 0;
         settleUntil = Time.time + settleSeconds;
-    }
-
-    static Vector3 Flat(Vector3 v)
-    {
-        v.y = 0f;
-        float m = v.magnitude;
-        if (m < 1e-6f) return Vector3.forward;
-        return v / m;
     }
 
     void LateUpdate()
@@ -88,9 +83,9 @@ public class StageCatTrackerDriver : MonoBehaviour
 
             trackerOriginPos = tracker.position;
 
-            // ✅ 시작 순간 트래커의 “수평 yaw”만 기준으로 축을 고정 (pitch/roll 무시)
-            basisForward = Flat(tracker.forward);
-            basisRight   = Flat(tracker.right);
+            // ✅ 무대축 = 월드축 고정 (bounds clamp도 월드 X/Z라 가장 일관적)
+            basisForward = Vector3.forward; // world +Z
+            basisRight = Vector3.right;   // world +X
 
             ready = true;
             return;
@@ -100,15 +95,28 @@ public class StageCatTrackerDriver : MonoBehaviour
         Vector3 deltaWorld = tracker.position - trackerOriginPos;
         deltaWorld.y = 0f;
 
-        float lateral = Vector3.Dot(deltaWorld, basisRight);
-        float forward = Vector3.Dot(deltaWorld, basisForward);
+        float lateral;
+        float forward;
+
+        if (!swapXZ)
+        {
+            // 정상: X=좌우, Z=전후
+            lateral = Vector3.Dot(deltaWorld, basisRight);
+            forward = Vector3.Dot(deltaWorld, basisForward);
+        }
+        else
+        {
+            // ✅ 스왑: X를 전후로, Z를 좌우로 해석
+            forward = Vector3.Dot(deltaWorld, basisRight);
+            lateral = Vector3.Dot(deltaWorld, basisForward);
+        }
 
         if (invertX) lateral = -lateral;
         if (invertZ) forward = -forward;
 
         Vector3 targetPos = catStartPos
-                            + Vector3.right   * (lateral * gainX)
-                            + Vector3.forward * (forward * gainZ);
+                            + basisRight * (lateral * gainX)
+                            + basisForward * (forward * gainZ);
 
         // 무대 bounds는 월드 X/Z 기준으로 clamp
         Vector3 c = centerMarker.position;
