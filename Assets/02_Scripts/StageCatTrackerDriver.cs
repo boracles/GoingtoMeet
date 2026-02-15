@@ -16,7 +16,7 @@ public class StageCatTrackerDriver : MonoBehaviour
     public float gainX = 1f;
     public float gainZ = 1f;
     public bool invertX = false;
-    public bool invertZ = true; // 너가 지금 Z invert 했다고 했으니 기본 true로
+    public bool invertZ = true;
 
     [Header("Smoothing")]
     public float posSmooth = 18f;
@@ -30,13 +30,28 @@ public class StageCatTrackerDriver : MonoBehaviour
     public bool useStartYawAsForward = true;
     public float yawOffsetDeg = 0f;
 
-    // ===== 추가: Yaw 회전 =====
-    [Header("Yaw (Rotation)")]
+    // ===== Body Yaw =====
+    [Header("Yaw (Body Rotation)")]
     public bool syncYaw = true;
     public bool mirrorYaw = false;
-    public float yawGain = 1f;         // 회전 감도(1 = 그대로)
-    public float yawExtraOffset = 0f;  // 고양이 정면 보정(필요하면 90/180)
+    public float yawGain = 1f;
+    public float yawExtraOffset = 0f;
     public float rotSmooth = 12f;
+
+    // ===== Head Pitch =====
+    [Header("Head Pitch")]
+    public Transform head;
+    public bool syncHeadPitch = true;
+    public bool mirrorHeadPitch = false;
+    public float headPitchGain = 1f;
+    public float headPitchOffset = 0f; // 기본 고개 각도 보정
+    public float minPitch = -45f;
+    public float maxPitch = 45f;
+    public float headRotSmooth = 18f;
+
+    // "head 로컬 축" 선택 (head의 X가 끄덕 축이 아닐 때 대비)
+    public enum HeadAxis { LocalX, LocalNegX, LocalZ, LocalNegZ }
+    public HeadAxis headAxis = HeadAxis.LocalX;
 
     Vector3 trackerOriginPos;
     Quaternion trackerOriginRot;
@@ -44,6 +59,9 @@ public class StageCatTrackerDriver : MonoBehaviour
     Vector3 catStartPos;
     Quaternion catStartRot;
     float catY;
+
+    Quaternion headBaseLocalRot;
+    bool headBaseReady;
 
     float settleUntil;
     Vector3 lastTrackerPos;
@@ -60,7 +78,6 @@ public class StageCatTrackerDriver : MonoBehaviour
         return new Quaternion(q.x*inv, q.y*inv, q.z*inv, q.w*inv);
     }
 
-    // 특정 축(axis)에 대한 twist만 추출 (swing-twist)
     static Quaternion ExtractTwist(Quaternion q, Vector3 axis)
     {
         axis.Normalize();
@@ -70,7 +87,6 @@ public class StageCatTrackerDriver : MonoBehaviour
         return NormalizeSafe(twist);
     }
 
-    // twist quaternion에서 signed angle 추출 (deg)
     static float SignedAngleFromTwist(Quaternion twist, Vector3 axis)
     {
         axis.Normalize();
@@ -91,16 +107,37 @@ public class StageCatTrackerDriver : MonoBehaviour
         return Mathf.Atan2(f.x, f.z) * Mathf.Rad2Deg;
     }
 
+    Quaternion HeadAxisRotation(float pitchDeg)
+    {
+        switch (headAxis)
+        {
+            case HeadAxis.LocalX:    return Quaternion.AngleAxis(pitchDeg, Vector3.right);
+            case HeadAxis.LocalNegX: return Quaternion.AngleAxis(-pitchDeg, Vector3.right);
+            case HeadAxis.LocalZ:    return Quaternion.AngleAxis(pitchDeg, Vector3.forward);
+            case HeadAxis.LocalNegZ: return Quaternion.AngleAxis(-pitchDeg, Vector3.forward);
+        }
+        return Quaternion.AngleAxis(pitchDeg, Vector3.right);
+    }
+
     void OnEnable()
     {
         ready = false;
         stableFrames = 0;
         settleUntil = Time.time + settleSeconds;
+
+        headBaseReady = false;
     }
 
     void LateUpdate()
     {
         if (!tracker || !centerMarker) return;
+
+        // head base 확보 (한 번)
+        if (syncHeadPitch && head && !headBaseReady)
+        {
+            headBaseLocalRot = head.localRotation;
+            headBaseReady = true;
+        }
 
         // 시작점 스냅 (무대 중심)
         if (!ready && stableFrames == 0)
@@ -155,8 +192,7 @@ public class StageCatTrackerDriver : MonoBehaviour
         Vector3 d = tracker.position - trackerOriginPos;
         d.y = 0f;
 
-        // 내 기준으로 회전 보정
-        d = toStageRot * d;
+        d = toStageRot * d; // 내 기준 보정
 
         float dx = d.x * gainX;
         float dz = d.z * gainZ;
@@ -183,13 +219,12 @@ public class StageCatTrackerDriver : MonoBehaviour
             transform.position = targetPos;
         }
 
-        // ===== 2) Yaw Rotation (트래커 세로축 기준 좌/우) =====
+        // 공통 delta
+        Quaternion delta = Quaternion.Inverse(trackerOriginRot) * tracker.rotation;
+
+        // ===== 2) Body Yaw =====
         if (syncYaw)
         {
-            // origin 대비 상대회전
-            Quaternion delta = Quaternion.Inverse(trackerOriginRot) * tracker.rotation;
-
-            // ✅ "세로축" = up축에 대한 twist만 분리
             Quaternion twistY = ExtractTwist(delta, Vector3.up);
             float yaw = SignedAngleFromTwist(twistY, Vector3.up);
 
@@ -197,11 +232,32 @@ public class StageCatTrackerDriver : MonoBehaviour
             if (mirrorYaw) yaw = -yaw;
             yaw += yawExtraOffset;
 
-            // 고양이는 Y축으로만 회전
             Quaternion targetRot = catStartRot * Quaternion.Euler(0f, yaw, 0f);
 
             float rt = (rotSmooth <= 0f) ? 1f : (1f - Mathf.Exp(-rotSmooth * Time.deltaTime));
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, rt);
+        }
+
+        // ===== 3) Head Pitch (Yaw 제거 후 X-twist) =====
+        if (syncHeadPitch && head && headBaseReady)
+        {
+            // 먼저 yaw twist 제거 (고개에 좌우 회전 섞이지 않게)
+            Quaternion twistY = ExtractTwist(delta, Vector3.up);
+            Quaternion noYaw = Quaternion.Inverse(twistY) * delta;
+
+            // 그 상태에서 X축 twist만 추출 → pitch
+            Quaternion twistX = ExtractTwist(noYaw, Vector3.right);
+            float pitch = SignedAngleFromTwist(twistX, Vector3.right);
+
+            pitch *= headPitchGain;
+            if (mirrorHeadPitch) pitch = -pitch;
+            pitch += headPitchOffset;
+            pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
+
+            Quaternion targetHeadLocal = headBaseLocalRot * HeadAxisRotation(pitch);
+
+            float ht = (headRotSmooth <= 0f) ? 1f : (1f - Mathf.Exp(-headRotSmooth * Time.deltaTime));
+            head.localRotation = Quaternion.Slerp(head.localRotation, targetHeadLocal, ht);
         }
     }
 }
