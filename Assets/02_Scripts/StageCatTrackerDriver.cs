@@ -26,6 +26,11 @@ public class StageCatTrackerDriver : MonoBehaviour
     public float maxJumpPerFrame = 0.05f;
     public int stableFramesNeeded = 12;
 
+    [Header("Yaw Clamp")]
+    public bool clampYaw = true;
+    public float minYaw = -120f;
+    public float maxYaw = 120f;
+
     [Header("Body-relative mapping (Position)")]
     public bool useStartYawAsForward = true;
     public float yawOffsetDeg = 0f;
@@ -231,6 +236,8 @@ public class StageCatTrackerDriver : MonoBehaviour
             yaw *= yawGain;
             if (mirrorYaw) yaw = -yaw;
             yaw += yawExtraOffset;
+
+            if (clampYaw) yaw = Mathf.Clamp(yaw, minYaw, maxYaw);
 
             Quaternion targetRot = catStartRot * Quaternion.Euler(0f, yaw, 0f);
 
