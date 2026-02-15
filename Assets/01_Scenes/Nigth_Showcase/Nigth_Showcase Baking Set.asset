@@ -139,11 +139,11 @@ MonoBehaviour:
         hasOnlyBiggerBricks: 0
     - position: {x: 0, y: -1, z: 0}
       index: 10
-      probeCount: 8960
+      probeCount: 9600
       minSubdiv: 0
       indexChunkCount: 91
       shChunkCount: 2
-      bricksCount: 140
+      bricksCount: 150
       indirectionEntryInfo:
       - positionInBricks: {x: 0, y: -27, z: 0}
         minSubdiv: 0
@@ -181,11 +181,11 @@ MonoBehaviour:
         hasOnlyBiggerBricks: 0
     - position: {x: 0, y: 0, z: 0}
       index: 13
-      probeCount: 37120
+      probeCount: 37184
       minSubdiv: 0
       indexChunkCount: 91
       shChunkCount: 5
-      bricksCount: 580
+      bricksCount: 581
       indirectionEntryInfo:
       - positionInBricks: {x: 0, y: 0, z: 0}
         minSubdiv: 0
@@ -195,11 +195,11 @@ MonoBehaviour:
         hasOnlyBiggerBricks: 0
     - position: {x: 0, y: 0, z: 1}
       index: 22
-      probeCount: 14208
+      probeCount: 14272
       minSubdiv: 0
       indexChunkCount: 91
       shChunkCount: 2
-      bricksCount: 222
+      bricksCount: 223
       indirectionEntryInfo:
       - positionInBricks: {x: 0, y: 0, z: 27}
         minSubdiv: 0
@@ -246,7 +246,7 @@ MonoBehaviour:
     m_Keys:
     - Default
     m_Values:
-    - sceneHash: -1706540090
+    - sceneHash: -1145875812
       cellDataAsset:
         m_AssetGUID: b4fb5fbe651e243418f2d38125e8fd1d
         m_StreamableAssetPath: APVStreamingAssets\6d561d472badcc6488bd069d40583eba\b4fb5fbe651e243418f2d38125e8fd1d.bytes
@@ -365,15 +365,15 @@ MonoBehaviour:
       - offset: 23392
         elementCount: 23
       - offset: 23760
-        elementCount: 140
-      - offset: 26000
+        elementCount: 150
+      - offset: 26160
         elementCount: 61
-      - offset: 26976
+      - offset: 27136
         elementCount: 60
-      - offset: 27936
-        elementCount: 580
-      - offset: 37216
-        elementCount: 222
+      - offset: 28096
+        elementCount: 581
+      - offset: 37392
+        elementCount: 223
     m_Asset: {fileID: 4900000, guid: a4a279deed0796c49a7f05e213f14c20, type: 3}
   cellSupportDataAsset:
     m_AssetGUID: 1a543ac7ddced734a9203e71da0ba929
