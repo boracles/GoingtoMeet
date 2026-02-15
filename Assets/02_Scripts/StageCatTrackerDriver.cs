@@ -29,11 +29,33 @@ public class StageCatTrackerDriver : MonoBehaviour
     public float maxJumpPerFrame = 0.05f;
     public int stableFramesNeeded = 12;
 
+    // =========================
+    // ✅ Rotation (Twist about chosen local axis)
+    // =========================
+    public enum TwistAxis { LocalX, LocalY, LocalZ }
+
+    [Header("Rotation (Twist Axis)")]
+    public bool applyYawRotation = true;
+
+    [Tooltip("네 트래커에서 '좌우 회전'으로 쓰고 싶은 로컬 축")]
+    public TwistAxis yawAxis = TwistAxis.LocalZ;   // ✅ 네가 말한 “local Z축 기준”이면 LocalZ
+
+    public float yawGain = 1f;
+    public bool invertYaw = false;
+    public float yawOffsetDegrees = 0f;
+
+    [Tooltip("0이면 즉시, >0이면 부드럽게")]
+    public float rotSmooth = 18f;
+
+    [Header("Yaw Safety")]
+    public float maxYawRateDegPerSec = 360f;
+    public float yawDeadzoneDeg = 0.5f;
+
+    // ===== internals =====
     Vector3 trackerOriginPos;
     Vector3 catStartPos;
     float catY;
 
-    // 기준축
     Vector3 basisRight;
     Vector3 basisForward;
 
@@ -42,11 +64,62 @@ public class StageCatTrackerDriver : MonoBehaviour
     int stableFrames;
     bool ready;
 
+    // rotation state
+    Quaternion trackerOriginLocalRot;
+    float catStartYaw;
+    float filteredYaw;
+
     void OnEnable()
     {
         ready = false;
         stableFrames = 0;
         settleUntil = Time.time + settleSeconds;
+    }
+
+    static Vector3 AxisVector(TwistAxis axis)
+    {
+        switch (axis)
+        {
+            case TwistAxis.LocalX: return Vector3.right;
+            case TwistAxis.LocalY: return Vector3.up;
+            default: return Vector3.forward; // LocalZ
+        }
+    }
+
+    // ✅ q(상대회전)에서 "axis(로컬축)"에 대한 twist 각도(도)만 뽑기 (swing 제거)
+    static float ExtractTwistDegrees(Quaternion q, Vector3 axisLocal)
+    {
+        axisLocal.Normalize();
+
+        // q = [w, v], v = (x,y,z)
+        Vector3 v = new Vector3(q.x, q.y, q.z);
+
+        // v를 axis에 투영한 성분만 남기면 twist의 벡터부가 됨
+        Vector3 proj = Vector3.Project(v, axisLocal);
+
+        Quaternion twist = new Quaternion(proj.x, proj.y, proj.z, q.w);
+        twist = NormalizeSafe(twist);
+
+        // twist 각도 추출 (signed)
+        float angleRad = 2f * Mathf.Atan2(new Vector3(twist.x, twist.y, twist.z).magnitude, twist.w);
+        float angleDeg = angleRad * Mathf.Rad2Deg;
+
+        // 0~360을 -180~180으로
+        if (angleDeg > 180f) angleDeg -= 360f;
+
+        // 부호 결정: twist의 벡터부가 축과 같은 방향이면 +, 반대면 -
+        float sign = Mathf.Sign(Vector3.Dot(new Vector3(twist.x, twist.y, twist.z), axisLocal));
+        if (sign == 0f) sign = 1f;
+
+        return angleDeg * sign;
+    }
+
+    static Quaternion NormalizeSafe(Quaternion q)
+    {
+        float mag = Mathf.Sqrt(q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w);
+        if (mag < 1e-8f) return Quaternion.identity;
+        float inv = 1f / mag;
+        return new Quaternion(q.x * inv, q.y * inv, q.z * inv, q.w * inv);
     }
 
     void LateUpdate()
@@ -83,30 +156,35 @@ public class StageCatTrackerDriver : MonoBehaviour
 
             trackerOriginPos = tracker.position;
 
-            // ✅ 무대축 = 월드축 고정 (bounds clamp도 월드 X/Z라 가장 일관적)
-            basisForward = Vector3.forward; // world +Z
-            basisRight = Vector3.right;   // world +X
+            // ✅ 이동축: 월드축 고정(너가 맞춘 상태 유지)
+            basisForward = Vector3.forward;
+            basisRight = Vector3.right;
+
+            // ✅ 회전 원점
+            if (applyYawRotation)
+            {
+                trackerOriginLocalRot = tracker.localRotation;
+                catStartYaw = transform.eulerAngles.y;
+                filteredYaw = catStartYaw;
+            }
 
             ready = true;
             return;
         }
 
-        // ===== delta를 "고정 기준축"으로 분해 =====
+        // ===== 이동 =====
         Vector3 deltaWorld = tracker.position - trackerOriginPos;
         deltaWorld.y = 0f;
 
-        float lateral;
-        float forward;
+        float lateral, forward;
 
         if (!swapXZ)
         {
-            // 정상: X=좌우, Z=전후
             lateral = Vector3.Dot(deltaWorld, basisRight);
             forward = Vector3.Dot(deltaWorld, basisForward);
         }
         else
         {
-            // ✅ 스왑: X를 전후로, Z를 좌우로 해석
             forward = Vector3.Dot(deltaWorld, basisRight);
             lateral = Vector3.Dot(deltaWorld, basisForward);
         }
@@ -118,7 +196,6 @@ public class StageCatTrackerDriver : MonoBehaviour
                             + basisRight * (lateral * gainX)
                             + basisForward * (forward * gainZ);
 
-        // 무대 bounds는 월드 X/Z 기준으로 clamp
         Vector3 c = centerMarker.position;
         float halfW = stageWidth * 0.5f;
         float halfD = stageDepth * 0.5f;
@@ -135,6 +212,35 @@ public class StageCatTrackerDriver : MonoBehaviour
         else
         {
             transform.position = targetPos;
+        }
+
+        // ===== 회전 (선택 축에 대한 twist만) =====
+        if (applyYawRotation)
+        {
+            Quaternion rel = Quaternion.Inverse(trackerOriginLocalRot) * tracker.localRotation;
+
+            Vector3 axisLocal = AxisVector(yawAxis);
+            float yawDelta = ExtractTwistDegrees(rel, axisLocal);
+
+            if (invertYaw) yawDelta = -yawDelta;
+            if (Mathf.Abs(yawDelta) < yawDeadzoneDeg) yawDelta = 0f;
+
+            float desiredYaw = catStartYaw + (yawDelta * yawGain) + yawOffsetDegrees;
+
+            float maxStep = maxYawRateDegPerSec * Time.deltaTime;
+            float newYaw = Mathf.MoveTowardsAngle(filteredYaw, desiredYaw, maxStep);
+
+            if (rotSmooth > 0f)
+            {
+                float t = 1f - Mathf.Exp(-rotSmooth * Time.deltaTime);
+                filteredYaw = Mathf.LerpAngle(filteredYaw, newYaw, t);
+            }
+            else
+            {
+                filteredYaw = newYaw;
+            }
+
+            transform.rotation = Quaternion.Euler(0f, filteredYaw, 0f);
         }
     }
 }
