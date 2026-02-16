@@ -51,9 +51,7 @@ public class CatLureSmoke : MonoBehaviour
     bool absorbing;
 
     Vector3 smoothVel;
-    Vector3 lastCatPos;
 
-    // 안전장치: 연기 목표가 갑자기 워프하지 않게(원하면 켜)
     [Header("Safety: limit smoke movement")]
     public bool limitSmokeSpeed = true;
     public float maxSmokeSpeed = 2.0f; // m/s
@@ -68,29 +66,28 @@ public class CatLureSmoke : MonoBehaviour
         rends = GetComponentsInChildren<Renderer>(true);
     }
 
-    void Start()
-    {
-        if (cat) lastCatPos = cat.position;
-    }
-
     void Update()
     {
         if (!cat || !target) return;
         if (absorbing) return;
 
-        // --- cat forward (시야 기준) ---
-        Vector3 fwd = (catView ? catView.forward : cat.forward);
+        // ✅ 시야 기준점(카메라/머리 앵커)
+        Transform view = (catView ? catView : cat);
+        Vector3 origin = view.position;
+
+        // --- forward (시야 기준) ---
+        Vector3 fwd = view.forward;
         fwd.y = 0f;
         if (fwd.sqrMagnitude < 0.0001f) fwd = Vector3.forward;
         fwd.Normalize();
 
-        // --- flat distance to target ---
-        Vector3 catFlat = new Vector3(cat.position.x, 0, cat.position.z);
+        // --- flat distance to target (origin 기준) ---
+        Vector3 orgFlat = new Vector3(origin.x, 0, origin.z);
         Vector3 tgtFlat = new Vector3(target.position.x, 0, target.position.z);
-        float d = Vector3.Distance(catFlat, tgtFlat);
+        float d = Vector3.Distance(orgFlat, tgtFlat);
 
-        // --- target direction (flat) ---
-        Vector3 toTarget = target.position - cat.position;
+        // --- target direction (flat, origin 기준) ---
+        Vector3 toTarget = target.position - origin;
         toTarget.y = 0f;
         Vector3 tgtDir = (toTarget.sqrMagnitude > 0.0001f) ? toTarget.normalized : fwd;
 
@@ -103,8 +100,8 @@ public class CatLureSmoke : MonoBehaviour
         // ✅ 리드 거리
         float leadDist = Mathf.Clamp(d * leadFactor, minLead, maxLead);
 
-        // --- base pos ---
-        Vector3 basePos = cat.position + dir * leadDist + Vector3.up * heightOffset;
+        // --- base pos (origin 기준) ---
+        Vector3 basePos = origin + dir * leadDist + Vector3.up * heightOffset;
 
         // ✅ 가까워질수록 연기가 타깃 근처로
         float bias = Mathf.InverseLerp(biasStartDist, biasEndDist, d);
@@ -119,10 +116,9 @@ public class CatLureSmoke : MonoBehaviour
 
         Vector3 desired = basePos + sway;
 
-        // --- feed-forward (cat delta) ---
-        Vector3 catDelta = cat.position - lastCatPos;
-        lastCatPos = cat.position;
-        desired += catDelta;
+        // ❌ 드리프트/오버슈트 주범: catDelta는 제거
+        // (SmoothDamp가 이미 추적하므로 중복 보정이 됨)
+        // desired += catDelta;
 
         // ✅ 목표 워프 완화(선택)
         if (limitSmokeSpeed)
@@ -132,8 +128,8 @@ public class CatLureSmoke : MonoBehaviour
         float smoothTime = Mathf.Max(0.001f, 1f / followSmooth);
         Vector3 nextPos = Vector3.SmoothDamp(transform.position, desired, ref smoothVel, smoothTime, maxFollowSpeed);
 
-        // --- never behind cat view ---
-        nextPos = ClampInFrontOfCat(nextPos, cat.position, fwd, minForwardDist);
+        // --- never behind cat view (origin 기준으로 clamp) ---
+        nextPos = ClampInFrontOfCat(nextPos, origin, fwd, minForwardDist);
 
         // --- smooth clamp correction ---
         transform.position = Vector3.Lerp(transform.position, nextPos, 1f - Mathf.Exp(-clampSmooth * Time.deltaTime));
@@ -160,7 +156,6 @@ public class CatLureSmoke : MonoBehaviour
     {
         absorbing = true;
 
-        // 파티클 멈추기(새 연기 생성 방지)
         if (stopParticleOnAbsorb)
         {
             for (int i = 0; i < ps.Length; i++)
@@ -173,8 +168,6 @@ public class CatLureSmoke : MonoBehaviour
         Vector3 startPos = transform.position;
         Vector3 endPos = soupCenter.position;
 
-        // 렌더러 페이드용(머티리얼 알파). 안 되면 마지막에 그냥 Disable됨.
-        // (URP/Shader에 따라 알파가 안 먹을 수 있음)
         MaterialPropertyBlock mpb = new MaterialPropertyBlock();
 
         float time = 0f;
@@ -186,7 +179,6 @@ public class CatLureSmoke : MonoBehaviour
 
             transform.position = Vector3.Lerp(startPos, endPos, k);
 
-            // 페이드(가능한 경우만)
             float alpha = 1f - u;
             for (int i = 0; i < rends.Length; i++)
             {
@@ -194,7 +186,6 @@ public class CatLureSmoke : MonoBehaviour
                 if (!r) continue;
 
                 r.GetPropertyBlock(mpb);
-                // 흔히 쓰는 프로퍼티들 시도(_BaseColor / _Color)
                 if (r.sharedMaterial && r.sharedMaterial.HasProperty("_BaseColor"))
                 {
                     Color c = r.sharedMaterial.GetColor("_BaseColor");
