@@ -40,6 +40,18 @@ public class CueDirector : MonoBehaviour
     public float defaultGainZ = 3f;
     public ActGain[] gainTable;
 
+    [System.Serializable]
+    public class ActWideVariants
+    {
+        public ActId act;
+        public CinemachineVirtualCamera[] wides; // 0=Wide_1, 1=Wide_2 ...
+    }
+
+    [Header("Wide Variants (per Act)")]
+    public ActWideVariants[] wideVariantsByAct;
+
+    bool isWide = false;          // 현재 뷰 상태
+    int wideVariantCursor = 0;    // Wide 들어갈 때마다 0,1,0,1...
 
     public StageToCityDeltaSync deltaSync;
 
@@ -72,32 +84,35 @@ public class CueDirector : MonoBehaviour
         {
             EnsureRT();
 
-            // Scene2에서는 Q = Start->End 패닝 이동
+            // Scene2는 기존 동작 유지(패닝)
             if (actMgr != null && actMgr.Current == ActId.Scene2)
             {
                 if (scene2MoveCo != null) StopCoroutine(scene2MoveCo);
                 scene2MoveCo = StartCoroutine(Scene2WideMove());
+                isWide = true;
+                return;
+            }
+
+            if (isWide)
+            {
+                SetCat();
+                isWide = false;
             }
             else
             {
-                SetWide(); // Scene1 등은 wide
+                SetWideVariant(wideVariantCursor);     // ✅ Wide 들어갈 때 0,1,0,1...
+                wideVariantCursor++;
+                isWide = true;
             }
         }
 
         if (Input.GetKeyDown(KeyCode.W))
         {
             EnsureRT();
-
-            // Scene1에서 W = Scene2로 넘어가면서 Cat 시작
-            if (actMgr != null && actMgr.Current == ActId.Scene1)
-            {
-                GoScene2Cat(actMgr);
-            }
-            else
-            {
-                // Scene2 이상에서는 W = Cat 뷰
-                SetCat();
-            }
+            // 너 기존 W 로직 유지하되, Cat로 강제하면 상태도 맞춰줘
+            // (원하면 W는 항상 Cat로)
+            SetCat();
+            isWide = false;
         }
     }
 
@@ -113,6 +128,16 @@ public class CueDirector : MonoBehaviour
         currentAct = Mathf.Clamp(actIndex, 0, (wideByAct?.Length ?? 1) - 1);
         ApplyActWide(currentAct);
         EnsureRT();
+    }
+    public void ForceCatViewResetCycle(bool resetCycle = true)
+    {
+        if (resetCycle)
+        {
+            wideVariantCursor = 0; // 다음 Wide는 0(_1)부터
+        }
+
+        isWide = false;
+        SetCat();
     }
 
     void ApplyActWide(int actIndex)
@@ -230,6 +255,17 @@ public class CueDirector : MonoBehaviour
         // Scene2 start/end은 내려둠
         if (wide2Start) wide2Start.Priority = 1;
         if (wide2End) wide2End.Priority = 1;
+
+        // ✅ 현재 Act의 wide variants도 내려둠 (Scene6_1/2 잔여 제거)
+        if (actMgr != null)
+        {
+            var list = GetWidesForAct(actMgr.Current);
+            if (list != null)
+            {
+                for (int i = 0; i < list.Length; i++)
+                    if (list[i]) list[i].Priority = 1;
+            }
+        }
     }
 
     public void GoScene2Cat(ActSceneManager mgr)
@@ -284,7 +320,6 @@ public class CueDirector : MonoBehaviour
         return 0;
     }
 
-
     IEnumerator MoveTransform(Transform target, Transform goal, float time)
     {
         Vector3 p0 = target.position;
@@ -307,6 +342,54 @@ public class CueDirector : MonoBehaviour
         }
 
         target.SetPositionAndRotation(p1, r1);
+    }
+
+    CinemachineVirtualCamera[] GetWidesForAct(ActId act)
+    {
+        if (wideVariantsByAct == null) return null;
+        for (int i = 0; i < wideVariantsByAct.Length; i++)
+            if (wideVariantsByAct[i] != null && wideVariantsByAct[i].act == act)
+                return wideVariantsByAct[i].wides;
+        return null;
+    }
+
+    void SetWideVariant(int variantIndex)
+    {
+        EnsureRT();
+
+        if (scene2MoveCo != null) { StopCoroutine(scene2MoveCo); scene2MoveCo = null; }
+
+        // Cat 내리기
+        if (vcamCat) vcamCat.Priority = 5;
+
+        // ✅ 다른 wide들 잔여 priority 제거(카메라 싸움 방지)
+        if (wideByAct != null)
+        {
+            for (int i = 0; i < wideByAct.Length; i++)
+                if (wideByAct[i]) wideByAct[i].Priority = 1;
+        }
+        if (wide2Start) wide2Start.Priority = 1;
+        if (wide2End) wide2End.Priority = 1;
+
+        // Scene2는 기존 규칙 유지
+        if (actMgr != null && actMgr.Current == ActId.Scene2)
+        {
+            // Q는 패닝으로 쓰는 기존 로직이면 여기서 return하지 말고 Update쪽에서 처리
+            if (wide2End) wide2End.Priority = 1;
+            if (wide2Start) wide2Start.Priority = 20;
+            return;
+        }
+
+        var list = (actMgr != null) ? GetWidesForAct(actMgr.Current) : null;
+        if (list == null || list.Length == 0) { SetWide(); return; } // fallback
+
+        // 전부 내리고
+        for (int i = 0; i < list.Length; i++)
+            if (list[i]) list[i].Priority = 1;
+
+        // 선택한 것만 올리기
+        int idx = Mathf.Abs(variantIndex) % list.Length;
+        if (list[idx]) list[idx].Priority = 20;
     }
 
 }

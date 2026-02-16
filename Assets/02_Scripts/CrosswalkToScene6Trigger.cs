@@ -43,7 +43,8 @@ public class CrosswalkToScene6Trigger : MonoBehaviour
         // 5) 델타싱크 기준 리셋(되돌아감 방지)
         if (cue.deltaSync) cue.deltaSync.RebaseFromCurrent();
 
-        // 6) Scene6 시작 뷰
-        cue.SetCat(); // 또는 cue.SetWide();
+        // 6) Scene6 시작 뷰 + 토글 사이클 리셋
+        cue.ForceCatViewResetCycle(true);
+
     }
 }

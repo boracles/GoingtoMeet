@@ -8,6 +8,9 @@ public class CatLureSmoke : MonoBehaviour
     public Transform target;         // 테이블(타깃)
     public Transform soupCenter;     // 연기 흡수 위치(냄비/국 중심)
 
+    [Header("View Camera (optional)")]
+    public Camera viewCam;           // 비우면 Camera.main 사용
+
     [Header("Height")]
     public float heightOffset = 0.25f;
 
@@ -16,9 +19,14 @@ public class CatLureSmoke : MonoBehaviour
     public float maxFollowSpeed = 50f;
 
     [Header("Never go behind cat view")]
-    public Transform catView;                 // Camera_CatView 권장
-    public float minForwardDist = 0.35f;
+    public Transform catView;                 // ✅ CatCamTarget(카메라 앵커) 권장
+    public float minForwardDist = 0.6f;       // ✅ 시야 이탈 많으면 0.6~1.0
     public float clampSmooth = 25f;
+
+    [Header("Keep in view (soft edge clamp)")]
+    public bool keepInView = true;
+    [Range(0.0f, 0.49f)] public float viewportPadX = 0.06f;
+    [Range(0.0f, 0.49f)] public float viewportPadY = 0.06f;
 
     [Header("Steer (direction)")]
     [Range(0f, 1f)]
@@ -48,13 +56,13 @@ public class CatLureSmoke : MonoBehaviour
     public bool disableOnFinish = true;     // true면 연기 오브젝트 비활성화
     public bool stopParticleOnAbsorb = true;
 
-    bool absorbing;
-
-    Vector3 smoothVel;
-
     [Header("Safety: limit smoke movement")]
     public bool limitSmokeSpeed = true;
     public float maxSmokeSpeed = 2.0f; // m/s
+
+    bool absorbing;
+
+    Vector3 smoothVel;
     Vector3 desiredVel;
 
     ParticleSystem[] ps;
@@ -71,11 +79,13 @@ public class CatLureSmoke : MonoBehaviour
         if (!cat || !target) return;
         if (absorbing) return;
 
-        // ✅ 시야 기준점(카메라/머리 앵커)
+        // ✅ 시야 기준점(카메라 앵커/머리)
         Transform view = (catView ? catView : cat);
         Vector3 origin = view.position;
 
-        // --- forward (시야 기준) ---
+        Camera cam = viewCam ? viewCam : Camera.main;
+
+        // --- forward (시야 기준, 수평) ---
         Vector3 fwd = view.forward;
         fwd.y = 0f;
         if (fwd.sqrMagnitude < 0.0001f) fwd = Vector3.forward;
@@ -116,9 +126,11 @@ public class CatLureSmoke : MonoBehaviour
 
         Vector3 desired = basePos + sway;
 
-        // ❌ 드리프트/오버슈트 주범: catDelta는 제거
-        // (SmoothDamp가 이미 추적하므로 중복 보정이 됨)
-        // desired += catDelta;
+        // ✅ 화면 밖으로 나갈 때만 "가장자리"로 살짝 복귀(중앙 고정 X)
+        if (keepInView && cam)
+        {
+            desired = KeepInViewportSoft(desired, cam, view, Mathf.Max(minForwardDist, leadDist), viewportPadX, viewportPadY);
+        }
 
         // ✅ 목표 워프 완화(선택)
         if (limitSmokeSpeed)
@@ -150,6 +162,30 @@ public class CatLureSmoke : MonoBehaviour
             pos = catPos + side + catFwd * minForward;
         }
         return pos;
+    }
+
+    static Vector3 KeepInViewportSoft(Vector3 worldPos, Camera cam, Transform view, float minAhead, float padX, float padY)
+    {
+        Vector3 vp = cam.WorldToViewportPoint(worldPos);
+
+        // 카메라 뒤쪽이면 앞으로 보내기
+        if (vp.z < 0.05f)
+        {
+            worldPos = view.position + view.forward * minAhead;
+            vp = cam.WorldToViewportPoint(worldPos);
+        }
+
+        bool outX = (vp.x < padX) || (vp.x > 1f - padX);
+        bool outY = (vp.y < padY) || (vp.y > 1f - padY);
+
+        // 화면 안이면 건드리지 않음(자연스러움 유지)
+        if (!outX && !outY) return worldPos;
+
+        // 화면 밖일 때만 "가장자리로" 클램프 (중앙 강제 X)
+        vp.x = Mathf.Clamp(vp.x, padX, 1f - padX);
+        vp.y = Mathf.Clamp(vp.y, padY, 1f - padY);
+
+        return cam.ViewportToWorldPoint(vp);
     }
 
     IEnumerator AbsorbSmoke()
