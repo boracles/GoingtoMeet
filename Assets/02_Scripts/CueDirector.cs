@@ -18,6 +18,12 @@ public class CueDirector : MonoBehaviour
     public CinemachineVirtualCamera wide2Start;     // Scene2 wide start (움직이는 주체)
     public CinemachineVirtualCamera wide2End;       // Scene2 wide end   (목표 포즈)
 
+    [Header("Cat Teleport/Align (after Scene2 move ends)")]
+    public Transform catRoot;         // 고양이(또는 고양이 Rig)의 루트
+    public Transform catEndPoint;     // Scene2에서 도착시키고 싶은 목표 포인트(위치+회전)
+    public bool teleportCatOnScene2End = true;
+    public float catEndMoveTime = 0f; // 0이면 즉시, >0이면 부드럽게 이동
+
     int currentAct = 0;
     Coroutine scene2MoveCo;
 
@@ -131,6 +137,20 @@ public class CueDirector : MonoBehaviour
         camT.rotation = toRot;
 
         scene2MoveCo = null;
+
+        // ✅ 카메라 패닝 완료 후 고양이를 EndPoint로 이동/정렬
+        if (teleportCatOnScene2End && catRoot && catEndPoint)
+        {
+            if (catEndMoveTime <= 0f)
+            {
+                catRoot.SetPositionAndRotation(catEndPoint.position, catEndPoint.rotation);
+            }
+            else
+            {
+                yield return StartCoroutine(MoveTransform(catRoot, catEndPoint, catEndMoveTime));
+            }
+        }
+
     }
 
     void SetWide()
@@ -183,4 +203,29 @@ public class CueDirector : MonoBehaviour
 
         SetCat();
     }
+
+    IEnumerator MoveTransform(Transform target, Transform goal, float time)
+    {
+        Vector3 p0 = target.position;
+        Quaternion r0 = target.rotation;
+        Vector3 p1 = goal.position;
+        Quaternion r1 = goal.rotation;
+
+        time = Mathf.Max(0.01f, time);
+        float t = 0f;
+
+        while (t < time)
+        {
+            t += Time.deltaTime;
+            float u = Mathf.Clamp01(t / time);
+
+            target.position = Vector3.Lerp(p0, p1, u);
+            target.rotation = Quaternion.Slerp(r0, r1, u);
+
+            yield return null;
+        }
+
+        target.SetPositionAndRotation(p1, r1);
+    }
+
 }
