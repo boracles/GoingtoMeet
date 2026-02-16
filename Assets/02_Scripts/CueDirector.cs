@@ -27,6 +27,19 @@ public class CueDirector : MonoBehaviour
     int currentAct = 0;
     Coroutine scene2MoveCo;
 
+    [System.Serializable]
+    public class ActGain
+    {
+        public ActId act;
+        public float gainX = 3f;
+        public float gainZ = 3f;
+    }
+
+    [Header("DeltaSync Gain Table (per Act)")]
+    public float defaultGainX = 3f;
+    public float defaultGainZ = 3f;
+    public ActGain[] gainTable;
+
 
     public StageToCityDeltaSync deltaSync;
 
@@ -41,6 +54,7 @@ public class CueDirector : MonoBehaviour
 
         int idx = actMgr ? (int)actMgr.Current : 0;
         SetAct(idx);
+        ApplyDeltaGainForCurrentAct(true);
 
         if (actMgr && actMgr.Current == ActId.Scene3 && catRoot && catEndPoint)
         {
@@ -103,6 +117,8 @@ public class CueDirector : MonoBehaviour
 
     void ApplyActWide(int actIndex)
     {
+        // ✅ Scene2는 wideByAct를 쓰지 않음 (wide2Start/End로 처리)
+        if (actMgr != null && actMgr.Current == ActId.Scene2) return;
         if (wideByAct == null) return;
 
         for (int i = 0; i < wideByAct.Length; i++)
@@ -146,27 +162,39 @@ public class CueDirector : MonoBehaviour
 
         scene2MoveCo = null;
 
-        // ✅ 카메라 패닝 완료 후 고양이를 EndPoint로 이동/정렬
         if (teleportCatOnScene2End && catRoot && catEndPoint)
         {
             if (catEndMoveTime <= 0f)
             {
                 catRoot.SetPositionAndRotation(catEndPoint.position, catEndPoint.rotation);
-                if (deltaSync) deltaSync.RebaseFromCurrent();
             }
             else
             {
                 yield return StartCoroutine(MoveTransform(catRoot, catEndPoint, catEndMoveTime));
-                if (deltaSync) deltaSync.RebaseFromCurrent();
             }
 
-        }
+            // ✅ 여기부터: "고양이 이동 완료" == Scene3 진입 조건
+            if (actMgr) actMgr.SwitchActImmediate(ActId.Scene3);
+            SetAct(IndexFromAct(ActId.Scene3));
 
+            ApplyDeltaGainForCurrentAct(true);       // (내부에서 changed면 Rebase함)
+            if (deltaSync) deltaSync.RebaseFromCurrent();  // 안전하게 한 번 더
+
+            // Scene3 시작 뷰(원하면)
+            SetCat(); // 또는 SetWide();
+        }
     }
 
     void SetWide()
     {
         EnsureRT();
+
+        // ✅ wideByAct 전체를 먼저 내려서 잔여 우선순위 제거
+        if (wideByAct != null)
+        {
+            for (int i = 0; i < wideByAct.Length; i++)
+                if (wideByAct[i]) wideByAct[i].Priority = 1;
+        }
 
         if (scene2MoveCo != null) { StopCoroutine(scene2MoveCo); scene2MoveCo = null; }
 
@@ -207,13 +235,55 @@ public class CueDirector : MonoBehaviour
     public void GoScene2Cat(ActSceneManager mgr)
     {
         mgr.SwitchActImmediate(ActId.Scene2);
-        SetAct(1);
+        currentAct = IndexFromAct(ActId.Scene2);
+        ApplyDeltaGainForCurrentAct(true);
 
         if (wide2Start) wide2Start.Priority = 1;
         if (wide2End) wide2End.Priority = 1;
 
         SetCat();
     }
+
+    void ApplyDeltaGainForCurrentAct(bool rebase = true)
+    {
+        if (!deltaSync || !actMgr) return;
+
+        float x = defaultGainX;
+        float z = defaultGainZ;
+
+        if (gainTable != null)
+        {
+            for (int i = 0; i < gainTable.Length; i++)
+            {
+                if (gainTable[i].act == actMgr.Current)
+                {
+                    x = gainTable[i].gainX;
+                    z = gainTable[i].gainZ;
+                    break;
+                }
+            }
+        }
+
+        bool changed = !Mathf.Approximately(deltaSync.gainX, x) || !Mathf.Approximately(deltaSync.gainZ, z);
+        deltaSync.gainX = x;
+        deltaSync.gainZ = z;
+
+        if (rebase && changed)
+            deltaSync.RebaseFromCurrent();
+    }
+
+    int IndexFromAct(ActId act)
+    {
+        int i = (int)act;
+
+        // wideByAct 배열 범위 안이면 그대로 사용
+        if (wideByAct != null && i >= 0 && i < wideByAct.Length)
+            return i;
+
+        // 범위 벗어나면 0으로 안전 처리
+        return 0;
+    }
+
 
     IEnumerator MoveTransform(Transform target, Transform goal, float time)
     {
