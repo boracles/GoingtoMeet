@@ -1,7 +1,14 @@
 fileFormatVersion: 2
 guid: d49066af3ba1ddb41ad7178ee54e74e1
+AssetOrigin:
+  serializedVersion: 1
+  productId: 156748
+  packageName: Low Poly Animated People
+  packageVersion: 3.02
+  assetPath: Assets/polyperfect/Low Poly Animated People/- Models/_MainRig_Children.fbx
+  uploadId: 827248
 ModelImporter:
-  serializedVersion: 21300
+  serializedVersion: 24200
   internalIDToNameTable:
   - first:
       74: 1827226128182048838
@@ -13,7 +20,7 @@ ModelImporter:
       name: lambert1
     second: {fileID: 2100000, guid: b6e1737a9eb98c046a70262dcbccfe68, type: 2}
   materials:
-    materialImportMode: 0
+    materialImportMode: 2
     materialName: 0
     materialSearch: 1
     materialLocation: 1
@@ -24,8 +31,6 @@ ModelImporter:
     optimizeGameObjects: 0
     removeConstantScaleCurves: 0
     motionNodeName: 
-    rigImportErrors: 
-    rigImportWarnings: 
     animationImportErrors: 
     animationImportWarnings: 
     animationRetargetingWarnings: 
@@ -48,6 +53,7 @@ ModelImporter:
     addColliders: 0
     useSRGBMaterialColor: 1
     sortHierarchyByName: 1
+    importPhysicalCameras: 1
     importVisibility: 1
     importBlendShapes: 1
     importCameras: 1
@@ -65,6 +71,9 @@ ModelImporter:
     maxBonesPerVertex: 4
     minBoneWeight: 0.001
     optimizeBones: 1
+    generateMeshLods: 0
+    meshLodGenerationFlags: 0
+    maximumMeshLod: -1
     meshOptimizationFlags: -1
     indexFormat: 0
     secondaryUVAngleDistortion: 8
@@ -75,9 +84,10 @@ ModelImporter:
     secondaryUVMinObjectScale: 1
     secondaryUVPackMargin: 4
     useFileScale: 1
+    strictVertexDataChecks: 0
   tangentSpace:
-    normalSmoothAngle: 60
-    normalImportMode: 0
+    normalSmoothAngle: 180
+    normalImportMode: 1
     tangentImportMode: 3
     normalCalculationMode: 4
     legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
@@ -559,8 +569,7 @@ ModelImporter:
     - name: ToesEnd_R
       parentName: Toes_R
       position: {x: -0.067814656, y: -2.5086599e-14, z: 0.000000117462875}
-      rotation: {x: 0.00000020861623, y: 0.00000080373127, z: -0.000000033731336,
-        w: 1}
+      rotation: {x: 0.00000020861623, y: 0.00000080373127, z: -0.000000033731336, w: 1}
       scale: {x: 1.0000013, y: 0.99999994, z: 1.0000008}
     - name: Spine1_M
       parentName: Root_M
@@ -880,8 +889,7 @@ ModelImporter:
     - name: IndexFinger3_L
       parentName: IndexFinger2_L
       position: {x: 0.030386724, y: 1.0658141e-16, z: -5.684342e-16}
-      rotation: {x: -0.000000055879323, y: -0.00000004097817, z: 0.000000094005316,
-        w: 1}
+      rotation: {x: -0.000000055879323, y: -0.00000004097817, z: 0.000000094005316, w: 1}
       scale: {x: 1.0000024, y: 1.0000013, z: 1.0000017}
     - name: RingFinger1_L
       parentName: Wrist_L
@@ -941,8 +949,7 @@ ModelImporter:
     - name: ToesEnd_L
       parentName: Toes_L
       position: {x: 0.067814656, y: -3.9968027e-17, z: 4.5342224e-10}
-      rotation: {x: 0.0000000311993, y: -0.000000014435496, z: 0.000000050978986,
-        w: 1}
+      rotation: {x: 0.0000000311993, y: -0.000000014435496, z: 0.000000050978986, w: 1}
       scale: {x: 1.0000015, y: 1.0000037, z: 1.0000007}
     - name: Geometry
       parentName: _MainRig_Children(Clone)
@@ -997,15 +1004,9 @@ ModelImporter:
   humanoidOversampling: 1
   avatarSetup: 1
   addHumanoidExtraRootOnlyWhenUsingAvatar: 0
+  importBlendShapeDeformPercent: 0
   remapMaterialsIfMaterialImportModeIsNone: 1
   additionalBone: 0
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 156748
-  packageName: Low Poly Animated People
-  packageVersion: 3.02
-  assetPath: Assets/polyperfect/Low Poly Animated People/- Models/_MainRig_Children.fbx
-  uploadId: 827248
