@@ -44,7 +44,9 @@ public class ActSceneManager : MonoBehaviour
 
     private readonly Queue<ActId> _queue = new();
     private bool _transitioning = false;
+    [SerializeField]
     private ActId _currentAct;
+
 
     void Awake()
     {
