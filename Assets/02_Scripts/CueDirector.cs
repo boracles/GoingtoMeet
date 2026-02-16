@@ -37,13 +37,18 @@ public class CueDirector : MonoBehaviour
 
     IEnumerator Start()
     {
-        yield return null; // ActSceneManager 초기화 끝난 뒤
+        yield return null;
 
         int idx = actMgr ? (int)actMgr.Current : 0;
         SetAct(idx);
 
-        // Scene2로 시작하면 Cat, 아니면 Wide
-        if (actMgr && actMgr.Current == ActId.Scene2) SetCat();
+        if (actMgr && actMgr.Current == ActId.Scene3 && catRoot && catEndPoint)
+        {
+            catRoot.SetPositionAndRotation(catEndPoint.position, catEndPoint.rotation);
+            if (deltaSync) deltaSync.RebaseFromCurrent();
+        }
+
+        if (actMgr && (actMgr.Current == ActId.Scene2 || actMgr.Current == ActId.Scene3)) SetCat();
         else SetWide();
     }
 
