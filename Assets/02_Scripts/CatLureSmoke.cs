@@ -59,8 +59,12 @@ public class CatLureSmoke : MonoBehaviour
     [Header("Safety: limit smoke movement")]
     public bool limitSmokeSpeed = true;
     public float maxSmokeSpeed = 2.0f; // m/s
-
-    bool absorbing;
+    [Header("Waypoint before table (optional)")]
+    public Transform waypoint;          // Scene6 Trigger 위치(또는 그 안에 둔 빈 오브젝트)
+    public float waypointRadius = 1.5f; // 이 거리 안으로 들어오면 다음 단계로
+    public bool useWaypoint = true;
+    bool waypointReached = false;
+    bool absorbing = false;
 
     Vector3 smoothVel;
     Vector3 desiredVel;
@@ -77,6 +81,22 @@ public class CatLureSmoke : MonoBehaviour
     void Update()
     {
         if (!cat || !target) return;
+
+        // ✅ 2단계 목표: waypoint -> table
+        Transform finalTarget = target;
+        Transform currentTarget = finalTarget;
+
+        if (useWaypoint && waypoint && !waypointReached)
+        {
+            currentTarget = waypoint;
+
+            // waypoint에 충분히 가까워지면 다음 단계(테이블)로 전환
+            Vector3 c0 = new Vector3(cat.position.x, 0f, cat.position.z);
+            Vector3 w0 = new Vector3(waypoint.position.x, 0f, waypoint.position.z);
+            if (Vector3.Distance(c0, w0) <= waypointRadius)
+                waypointReached = true;
+        }
+
         if (absorbing) return;
 
         // ✅ 시야 기준점(카메라 앵커/머리)
@@ -93,11 +113,13 @@ public class CatLureSmoke : MonoBehaviour
 
         // --- flat distance to target (origin 기준) ---
         Vector3 orgFlat = new Vector3(origin.x, 0, origin.z);
-        Vector3 tgtFlat = new Vector3(target.position.x, 0, target.position.z);
+        Vector3 tgtFlat = new Vector3(currentTarget.position.x, 0, currentTarget.position.z);
+
         float d = Vector3.Distance(orgFlat, tgtFlat);
 
         // --- target direction (flat, origin 기준) ---
-        Vector3 toTarget = target.position - origin;
+        Vector3 toTarget = currentTarget.position - origin;
+
         toTarget.y = 0f;
         Vector3 tgtDir = (toTarget.sqrMagnitude > 0.0001f) ? toTarget.normalized : fwd;
 
@@ -115,7 +137,8 @@ public class CatLureSmoke : MonoBehaviour
 
         // ✅ 가까워질수록 연기가 타깃 근처로
         float bias = Mathf.InverseLerp(biasStartDist, biasEndDist, d);
-        Vector3 nearTargetPos = target.position - tgtDir * targetBackOff + Vector3.up * heightOffset;
+        Vector3 nearTargetPos = currentTarget.position - tgtDir * targetBackOff + Vector3.up * heightOffset;
+
         basePos = Vector3.Lerp(basePos, nearTargetPos, bias);
 
         // --- sway ---
