@@ -47,17 +47,13 @@ public class ActSceneManager : MonoBehaviour
     [SerializeField]
     private ActId _currentAct;
 
-
     void Awake()
     {
-        // 초기 상태 정리: 모든 enable 리스트에 있는 루트는 일단 끈다(중복 포함 가능)
         foreach (var act in acts)
-        {
             foreach (var go in act.enable)
                 if (go) go.SetActive(false);
-        }
 
-        // 시작 act 진입
+        _currentAct = startAct;      // ✅ 추가
         SwitchActImmediate(startAct);
     }
 
