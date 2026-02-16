@@ -21,6 +21,20 @@ public class StageCatTrackerDriver : MonoBehaviour
     [Tooltip("✅ 앞/뒤로 움직였는데 좌/우로 간다면 켜라 (X/Z 스왑)")]
     public bool swapXZ = false;
 
+    [Header("Vertical (Y) Mapping")]
+    public bool applyY = true;
+    public float gainY = 1f;
+    public bool invertY = false;
+
+    [Tooltip("고양이 시작 좌표를 고정값으로 강제")]
+    public bool useFixedStartPosition = true;
+
+    [Tooltip("고양이 시작 좌표(월드)")]
+    public Vector3 fixedStartPosition = new Vector3(22.25f, -0.565f, 8.17f);
+
+    [Tooltip("절대 내려가지 않는 바닥 Y")]
+    public float yFloor = -0.565f;
+
     [Header("Smoothing")]
     public float posSmooth = 18f;
 
@@ -30,7 +44,7 @@ public class StageCatTrackerDriver : MonoBehaviour
     public int stableFramesNeeded = 12;
 
     // =========================
-    // ✅ Rotation (Twist about chosen local axis)
+    // Rotation (Twist about chosen local axis)
     // =========================
     public enum TwistAxis { LocalX, LocalY, LocalZ }
 
@@ -52,10 +66,10 @@ public class StageCatTrackerDriver : MonoBehaviour
     public float yawDeadzoneDeg = 0.5f;
 
     // =========================
-    // ✅ Head Pitch (Tracker Local X -> Head Local X)
+    // Head Pitch (Tracker Local X -> Head Local X)
     // =========================
     [Header("Head Pitch (Tracker Local X -> Head Local X)")]
-    public Transform head;                    // ✅ 고양이 머리 Transform (인스펙터에 할당)
+    public Transform head;
     public bool applyHeadPitch = true;
 
     public float pitchGain = 1f;
@@ -76,7 +90,6 @@ public class StageCatTrackerDriver : MonoBehaviour
     // ===== internals =====
     Vector3 trackerOriginPos;
     Vector3 catStartPos;
-    float catY;
 
     Vector3 basisRight;
     Vector3 basisForward;
@@ -113,28 +126,6 @@ public class StageCatTrackerDriver : MonoBehaviour
         }
     }
 
-    // ✅ q(상대회전)에서 "axis(로컬축)"에 대한 twist 각도(도)만 뽑기 (swing 제거)
-    static float ExtractTwistDegrees(Quaternion q, Vector3 axisLocal)
-    {
-        axisLocal.Normalize();
-
-        Vector3 v = new Vector3(q.x, q.y, q.z);
-        Vector3 proj = Vector3.Project(v, axisLocal);
-
-        Quaternion twist = new Quaternion(proj.x, proj.y, proj.z, q.w);
-        twist = NormalizeSafe(twist);
-
-        float angleRad = 2f * Mathf.Atan2(new Vector3(twist.x, twist.y, twist.z).magnitude, twist.w);
-        float angleDeg = angleRad * Mathf.Rad2Deg;
-
-        if (angleDeg > 180f) angleDeg -= 360f;
-
-        float sign = Mathf.Sign(Vector3.Dot(new Vector3(twist.x, twist.y, twist.z), axisLocal));
-        if (sign == 0f) sign = 1f;
-
-        return angleDeg * sign;
-    }
-
     static Quaternion NormalizeSafe(Quaternion q)
     {
         float mag = Mathf.Sqrt(q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w);
@@ -149,20 +140,46 @@ public class StageCatTrackerDriver : MonoBehaviour
         return deg;
     }
 
+    // q(상대회전)에서 axis(로컬축)에 대한 twist 각도(도)만 뽑기
+    static float ExtractTwistDegrees(Quaternion q, Vector3 axisLocal)
+    {
+        axisLocal.Normalize();
+
+        Vector3 v = new Vector3(q.x, q.y, q.z);
+        Vector3 proj = Vector3.Project(v, axisLocal);
+
+        Quaternion twist = new Quaternion(proj.x, proj.y, proj.z, q.w);
+        twist = NormalizeSafe(twist);
+
+        float angleRad = 2f * Mathf.Atan2(new Vector3(twist.x, twist.y, twist.z).magnitude, twist.w);
+        float angleDeg = angleRad * Mathf.Rad2Deg;
+        if (angleDeg > 180f) angleDeg -= 360f;
+
+        float sign = Mathf.Sign(Vector3.Dot(new Vector3(twist.x, twist.y, twist.z), axisLocal));
+        if (sign == 0f) sign = 1f;
+
+        return angleDeg * sign;
+    }
+
     void LateUpdate()
     {
-        if (!tracker || !centerMarker) return;
+        if (!tracker) return;
 
-        // 시작점 스냅(무대 중심)
+        // ===== 초기 스냅 =====
         if (!ready && stableFrames == 0)
         {
-            catY = transform.position.y;
-            catStartPos = new Vector3(centerMarker.position.x, catY, centerMarker.position.z);
+            // ✅ 시작 위치 강제
+            catStartPos = useFixedStartPosition ? fixedStartPosition
+                                                : transform.position;
+
+            // 바닥 보정 (시작도 바닥 아래로 못 가게)
+            if (catStartPos.y < yFloor) catStartPos.y = yFloor;
+
             transform.position = catStartPos;
             lastTrackerPos = tracker.position;
         }
 
-        // 안정화 + origin 확정
+        // ===== 안정화 + origin 확정 =====
         if (!ready)
         {
             transform.position = catStartPos;
@@ -196,7 +213,6 @@ public class StageCatTrackerDriver : MonoBehaviour
             if (head)
             {
                 headStartLocalRot = head.localRotation;
-                // head의 현재 local X를 시작값으로 저장
                 headStartPitch = NormalizeAngle180(head.localEulerAngles.x);
                 filteredPitch = headStartPitch;
             }
@@ -205,9 +221,8 @@ public class StageCatTrackerDriver : MonoBehaviour
             return;
         }
 
-        // ===== 이동 =====
+        // ===== 이동 (XYZ) =====
         Vector3 deltaWorld = tracker.position - trackerOriginPos;
-        deltaWorld.y = 0f;
 
         float lateral, forward;
 
@@ -225,17 +240,31 @@ public class StageCatTrackerDriver : MonoBehaviour
         if (invertX) lateral = -lateral;
         if (invertZ) forward = -forward;
 
+        float dy = 0f;
+        if (applyY)
+        {
+            dy = deltaWorld.y * gainY;
+            if (invertY) dy = -dy;
+        }
+
         Vector3 targetPos = catStartPos
                             + basisRight * (lateral * gainX)
                             + basisForward * (forward * gainZ);
 
-        Vector3 c = centerMarker.position;
-        float halfW = stageWidth * 0.5f;
-        float halfD = stageDepth * 0.5f;
+        // ✅ Y 반영 + 바닥 제한
+        float desiredY = catStartPos.y + dy;
+        targetPos.y = Mathf.Max(yFloor, desiredY);
 
-        targetPos.x = Mathf.Clamp(targetPos.x, c.x - halfW, c.x + halfW);
-        targetPos.z = Mathf.Clamp(targetPos.z, c.z - halfD, c.z + halfD);
-        targetPos.y = catY;
+        // ✅ XZ만 무대 영역 clamp
+        if (centerMarker)
+        {
+            Vector3 c = centerMarker.position;
+            float halfW = stageWidth * 0.5f;
+            float halfD = stageDepth * 0.5f;
+
+            targetPos.x = Mathf.Clamp(targetPos.x, c.x - halfW, c.x + halfW);
+            targetPos.z = Mathf.Clamp(targetPos.z, c.z - halfD, c.z + halfD);
+        }
 
         if (posSmooth > 0f)
         {
@@ -247,7 +276,7 @@ public class StageCatTrackerDriver : MonoBehaviour
             transform.position = targetPos;
         }
 
-        // ===== 바디 Yaw (선택 축에 대한 twist만) =====
+        // ===== 바디 Yaw (선택 축 twist) =====
         if (applyYawRotation)
         {
             Quaternion rel = Quaternion.Inverse(trackerOriginLocalRot) * tracker.localRotation;
@@ -281,7 +310,6 @@ public class StageCatTrackerDriver : MonoBehaviour
         {
             Quaternion rel = Quaternion.Inverse(trackerOriginLocalRot) * tracker.localRotation;
 
-            // ✅ 트래커 로컬 X축에 대한 twist만 = pitch 입력으로 사용
             float pitchDelta = ExtractTwistDegrees(rel, Vector3.right);
 
             if (invertPitch) pitchDelta = -pitchDelta;
@@ -303,8 +331,7 @@ public class StageCatTrackerDriver : MonoBehaviour
                 filteredPitch = newPitch;
             }
 
-            // ✅ Euler로 x만 덮지 말고: 시작 로컬 회전에 X축 회전만 곱해서 적용
-            float deltaPitch = filteredPitch - headStartPitch;  // 시작 대비 변화량
+            float deltaPitch = filteredPitch - headStartPitch;
             head.localRotation = headStartLocalRot * Quaternion.AngleAxis(deltaPitch, Vector3.right);
         }
     }

@@ -2,20 +2,25 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!21 &2100000
 Material:
-  serializedVersion: 6
+  serializedVersion: 8
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: AE_Grass_01
   m_Shader: {fileID: 4800000, guid: b9e2206000f063e4482138f005c8e6e1, type: 3}
-  m_ShaderKeywords: _ALPHATEST_ON
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords:
+  - _ALPHATEST_ON
   m_LightmapFlags: 4
-  m_EnableInstancingVariants: 0
+  m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
+  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -91,8 +96,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    m_Ints: []
     m_Floats:
-    - _Ambient_Occlusion: 0.02
+    - _AlphaCutoff: 0.5
+    - _Ambient_Occlusion: 0.05
     - _Amplitude: 0.0425
     - _BumpScale: 1
     - _Cutoff: 0.5
@@ -115,10 +122,10 @@ Material:
     - _Tilling_Contrast: 1.49
     - _UVSec: 0
     - _Wind: 7.76
-    - _WindPower: 0
-    - _WindScale: 0
-    - _WindSpeed: 0
-    - _Wind_Size: 0
+    - _WindPower: 0.05
+    - _WindScale: 0.056
+    - _WindSpeed: 0.056
+    - _Wind_Size: 0.015
     - _Wind_Speed: 0.94
     - _ZWrite: 1
     - __dirty: 0
@@ -129,3 +136,5 @@ Material:
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _Emissive: {r: 0, g: 0, b: 0, a: 0}
     - _Tilling: {r: 0, g: 0, b: 0, a: 0}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1
