@@ -1,7 +1,14 @@
 fileFormatVersion: 2
 guid: a4a3ba617ed9c5946bb76844ec1ef299
+AssetOrigin:
+  serializedVersion: 1
+  productId: 156748
+  packageName: Low Poly Animated People
+  packageVersion: 3.02
+  assetPath: Assets/polyperfect/Low Poly Animated People/- Models/_MainRig.fbx
+  uploadId: 827248
 ModelImporter:
-  serializedVersion: 21300
+  serializedVersion: 24200
   internalIDToNameTable: []
   externalObjects:
   - first:
@@ -21,8 +28,6 @@ ModelImporter:
     optimizeGameObjects: 0
     removeConstantScaleCurves: 0
     motionNodeName: 
-    rigImportErrors: 
-    rigImportWarnings: 
     animationImportErrors: 
     animationImportWarnings: 
     animationRetargetingWarnings: 
@@ -45,6 +50,7 @@ ModelImporter:
     addColliders: 0
     useSRGBMaterialColor: 1
     sortHierarchyByName: 1
+    importPhysicalCameras: 1
     importVisibility: 1
     importBlendShapes: 1
     importCameras: 1
@@ -62,6 +68,9 @@ ModelImporter:
     maxBonesPerVertex: 4
     minBoneWeight: 0.001
     optimizeBones: 1
+    generateMeshLods: 0
+    meshLodGenerationFlags: 0
+    maximumMeshLod: -1
     meshOptimizationFlags: -1
     indexFormat: 0
     secondaryUVAngleDistortion: 8
@@ -72,9 +81,10 @@ ModelImporter:
     secondaryUVMinObjectScale: 1
     secondaryUVPackMargin: 4
     useFileScale: 1
+    strictVertexDataChecks: 0
   tangentSpace:
-    normalSmoothAngle: 60
-    normalImportMode: 0
+    normalSmoothAngle: 180
+    normalImportMode: 1
     tangentImportMode: 3
     normalCalculationMode: 4
     legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
@@ -1126,8 +1136,7 @@ ModelImporter:
     - name: ToesEnd_R
       parentName: Toes_R
       position: {x: -0.093909815, y: -3.4416914e-14, z: 0.00000016266274}
-      rotation: {x: -0.00000012619418, y: 0.000000016763803, z: -0.000000030897347,
-        w: 1}
+      rotation: {x: -0.00000012619418, y: 0.000000016763803, z: -0.000000030897347, w: 1}
       scale: {x: 1.0000492, y: 0.9999997, z: 1.0000345}
     - name: Spine1_M
       parentName: Root_M
@@ -1507,8 +1516,7 @@ ModelImporter:
     - name: ToesEnd_L
       parentName: Toes_L
       position: {x: 0.093909815, y: 5.7731595e-17, z: 6.278985e-10}
-      rotation: {x: 0.00000012293457, y: 0.00000092061225, z: -0.000000042997268,
-        w: 1}
+      rotation: {x: 0.00000012293457, y: 0.00000092061225, z: -0.000000042997268, w: 1}
       scale: {x: 1.0000577, y: 1.0001316, z: 1.0000488}
     armTwist: 0.5
     foreArmTwist: 0.5
@@ -1528,15 +1536,9 @@ ModelImporter:
   humanoidOversampling: 1
   avatarSetup: 1
   addHumanoidExtraRootOnlyWhenUsingAvatar: 0
+  importBlendShapeDeformPercent: 0
   remapMaterialsIfMaterialImportModeIsNone: 1
   additionalBone: 0
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 156748
-  packageName: Low Poly Animated People
-  packageVersion: 3.02
-  assetPath: Assets/polyperfect/Low Poly Animated People/- Models/_MainRig.fbx
-  uploadId: 827248
