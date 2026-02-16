@@ -185,7 +185,7 @@ public class CueDirector : MonoBehaviour
         }
     }
 
-    void SetWide()
+    public void SetWide()
     {
         EnsureRT();
 
@@ -216,7 +216,7 @@ public class CueDirector : MonoBehaviour
             wideByAct[currentAct].Priority = 20;
     }
 
-    void SetCat()
+    public void SetCat()
     {
         EnsureRT();
 
@@ -244,7 +244,7 @@ public class CueDirector : MonoBehaviour
         SetCat();
     }
 
-    void ApplyDeltaGainForCurrentAct(bool rebase = true)
+    public void ApplyDeltaGainForCurrentAct(bool rebase = true)
     {
         if (!deltaSync || !actMgr) return;
 
@@ -272,7 +272,7 @@ public class CueDirector : MonoBehaviour
             deltaSync.RebaseFromCurrent();
     }
 
-    int IndexFromAct(ActId act)
+    public int IndexFromAct(ActId act)
     {
         int i = (int)act;
 
