@@ -67,19 +67,19 @@ public class StageToCityDeltaSync : MonoBehaviour
             Vector3 delta = stagePos - lastStagePos;
             lastStagePos = stagePos;
 
-            Vector3 stageRight = stageCat.right;   stageRight.y = 0f; stageRight.Normalize();
-            Vector3 stageFwd   = stageCat.forward; stageFwd.y   = 0f; stageFwd.Normalize();
+            Vector3 stageRight = stageCat.right; stageRight.y = 0f; stageRight.Normalize();
+            Vector3 stageFwd = stageCat.forward; stageFwd.y = 0f; stageFwd.Normalize();
 
             float lateral = Vector3.Dot(delta, stageRight) * gainX;
-            float forward = Vector3.Dot(delta, stageFwd)   * gainZ;
+            float forward = Vector3.Dot(delta, stageFwd) * gainZ;
 
             if (mirrorLateral) lateral = -lateral;
             if (invertX) lateral = -lateral;
             if (invertZ) forward = -forward;
 
             // ✅ cityRight/cityFwd는 "초기 방향"이 아니라 "현재 방향"을 쓰는 게 자연스럽다.
-            Vector3 cityRight = cityCat.right;   cityRight.y = 0f; cityRight.Normalize();
-            Vector3 cityFwd   = cityCat.forward; cityFwd.y   = 0f; cityFwd.Normalize();
+            Vector3 cityRight = cityCat.right; cityRight.y = 0f; cityRight.Normalize();
+            Vector3 cityFwd = cityCat.forward; cityFwd.y = 0f; cityFwd.Normalize();
 
             cityAccumDelta += cityRight * lateral + cityFwd * forward;
 
@@ -145,6 +145,24 @@ public class StageToCityDeltaSync : MonoBehaviour
                 cityHead.localRotation = Quaternion.Slerp(cityHead.localRotation, src, ht);
             }
         }
+    }
+
+    public void RebaseFromCurrent()
+    {
+        if (!stageCat || !cityCat) return;
+
+        // 지금 상태를 새 기준으로
+        lastStagePos = stageCat.position;
+        lastStageYaw = stageCat.eulerAngles.y;
+
+        cityStartPos = cityCat.position;
+        cityStartYaw = cityCat.eulerAngles.y;
+
+        cityAccumDelta = Vector3.zero;
+        cityAccumYaw = 0f;
+
+        hasLast = true;
+        hasLastYaw = true;
     }
 
     public void ResetSync()

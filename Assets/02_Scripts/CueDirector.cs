@@ -27,6 +27,9 @@ public class CueDirector : MonoBehaviour
     int currentAct = 0;
     Coroutine scene2MoveCo;
 
+
+    public StageToCityDeltaSync deltaSync;
+
     void Awake()
     {
         EnsureRT();
@@ -144,11 +147,14 @@ public class CueDirector : MonoBehaviour
             if (catEndMoveTime <= 0f)
             {
                 catRoot.SetPositionAndRotation(catEndPoint.position, catEndPoint.rotation);
+                if (deltaSync) deltaSync.RebaseFromCurrent();
             }
             else
             {
                 yield return StartCoroutine(MoveTransform(catRoot, catEndPoint, catEndMoveTime));
+                if (deltaSync) deltaSync.RebaseFromCurrent();
             }
+
         }
 
     }
