@@ -23,6 +23,9 @@ public class CueDirector : MonoBehaviour
     public Transform catEndPoint;     // Scene2에서 도착시키고 싶은 목표 포인트(위치+회전)
     public bool teleportCatOnScene2End = true;
     public float catEndMoveTime = 0f; // 0이면 즉시, >0이면 부드럽게 이동
+    [Header("Scene6 Start (snap/lerp to trigger pose)")]
+    public Transform scene6StartPoint;     // Scene6 Trigger 위치/회전 마커 (트리거 오브젝트 transform 또는 별도 snapTarget)
+    public float scene6StartMoveTime = 0.6f;  // 러핑 시간(초)
 
     int currentAct = 0;
     Coroutine scene2MoveCo;
@@ -65,8 +68,26 @@ public class CueDirector : MonoBehaviour
         yield return null;
 
         int idx = actMgr ? (int)actMgr.Current : 0;
-        SetAct(idx);
+        SetAct(actMgr ? IndexFromAct(actMgr.Current) : 0);
+
         ApplyDeltaGainForCurrentAct(true);
+
+        // ✅ Scene6로 시작하면: 트리거 포즈로 러핑 이동 + Cat 뷰로 시작
+        if (actMgr && actMgr.Current == ActId.Scene6 && catRoot && scene6StartPoint)
+        {
+            // Cat 뷰로 고정
+            ForceCatViewResetCycle(true);
+
+            // Scene6 gain 적용(혹시 Scene6 테이블 값 반영)
+            ApplyDeltaGainForCurrentAct(false);
+
+            // 러핑 이동
+            yield return StartCoroutine(MoveTransform(catRoot, scene6StartPoint, scene6StartMoveTime));
+
+            // 델타싱크 기준 리셋(되돌아감 방지)
+            if (deltaSync) deltaSync.RebaseFromCurrent();
+        }
+
 
         if (actMgr && actMgr.Current == ActId.Scene3 && catRoot && catEndPoint)
         {
@@ -75,7 +96,13 @@ public class CueDirector : MonoBehaviour
         }
 
         if (actMgr && (actMgr.Current == ActId.Scene2 || actMgr.Current == ActId.Scene3)) SetCat();
+        else if (actMgr && actMgr.Current == ActId.Scene6)
+        {
+            // Scene6는 위에서 ForceCatViewResetCycle로 이미 Cat 고정했으니 그대로 둔다
+        }
         else SetWide();
+
+
     }
 
     void Update()
@@ -202,8 +229,12 @@ public class CueDirector : MonoBehaviour
             if (actMgr) actMgr.SwitchActImmediate(ActId.Scene3);
             SetAct(IndexFromAct(ActId.Scene3));
 
-            ApplyDeltaGainForCurrentAct(true);       // (내부에서 changed면 Rebase함)
-            if (deltaSync) deltaSync.RebaseFromCurrent();  // 안전하게 한 번 더
+            // 델타싱크 기준 리셋(되돌아감 방지)
+            if (deltaSync) deltaSync.RebaseFromCurrent();
+
+            // ✅ Scene3 기준 gain 적용 + 델타싱크 리베이스
+            ApplyDeltaGainForCurrentAct(true);
+            if (deltaSync) deltaSync.RebaseFromCurrent();
 
             // Scene3 시작 뷰(원하면)
             SetCat(); // 또는 SetWide();
