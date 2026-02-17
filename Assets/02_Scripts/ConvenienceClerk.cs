@@ -28,6 +28,7 @@ public class ConvenienceClerk : MonoBehaviour
 
     [Header("Move After Do2")]
     [SerializeField] private Transform do2EndSpot;   // 이동(도착) 위치
+    [SerializeField] private GameObject blossom;   // 이동(도착) 위치
     [SerializeField] private bool teleportOnDo2End = true;
     [SerializeField] private float moveSpeed = 2.5f;
 
@@ -49,14 +50,12 @@ public class ConvenienceClerk : MonoBehaviour
     {
         var st = anim.GetCurrentAnimatorStateInfo(0);
 
-        // 🔹 Do1 시작 시 기록
-        if (st.IsName("Do1"))
+        if (st.IsName("Do1") || st.IsName("Base Layer.Do1"))
         {
             wasPlayingDo1 = true;
         }
 
-        // 🔥 Do1 끝나고 Standing으로 복귀한 순간
-        if (wasPlayingDo1 && st.IsName(idleStateName))
+        if (wasPlayingDo1 && (st.IsName(idleStateName) || st.IsName("Base Layer." + idleStateName)))
         {
             wasPlayingDo1 = false;
             rotateToTarget = true;
@@ -67,16 +66,16 @@ public class ConvenienceClerk : MonoBehaviour
         {
             RotateTowardTarget();
         }
-        // 🔹 Do2 시작 시 기록
-        if (st.IsName("Do2"))
+        if (st.IsName("Do2") || st.IsName("Base Layer.Do2"))
         {
             wasPlayingDo2 = true;
         }
 
-        // 🔥 Do2 끝나고 Standing으로 복귀한 순간 -> 이동 실행
-        if (wasPlayingDo2 && st.IsName(idleStateName))
+
+        if (wasPlayingDo2 && (st.IsName(idleStateName) || st.IsName("Base Layer." + idleStateName)))
         {
             wasPlayingDo2 = false;
+            blossom.SetActive(true);
             StartMoveAfterDo2();
         }
 
