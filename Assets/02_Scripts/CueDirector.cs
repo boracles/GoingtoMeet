@@ -366,7 +366,7 @@ public class CueDirector : MonoBehaviour
             }
             if (actMgr != null && actMgr.Current == ActId.Scene11)
             {
-                // ✅ Scene6 wide 잔재 끄기 (Scene11에서 Scene6로 튀는 문제 차단)
+                // (선택) Scene6 잔재 끄기 유지
                 var s6 = GetWidesForAct(ActId.Scene6);
                 if (s6 != null)
                 {
@@ -378,15 +378,22 @@ public class CueDirector : MonoBehaviour
                 if (list != null)
                 {
                     for (int i = 0; i < list.Length; i++)
-                        if (list[i]) list[i].enabled = false;   // ✅ Wide들 확실히 끄기
+                        if (list[i])
+                        {
+                            list[i].enabled = true;   // ✅ 유지
+                            list[i].Priority = 20;    // ✅ wide는 낮게
+                        }
                 }
 
-                SetCat();               // CatView로 복귀
+                if (vcamCat)
+                {
+                    vcamCat.enabled = true;
+                    vcamCat.Priority = 100;           // ✅ cat이 최상
+                }
+
                 isWide = false;
                 return;
             }
-
-
             SetCat();
             isWide = false;
         }
