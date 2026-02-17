@@ -174,7 +174,7 @@ Material:
     - _BlendDstAlpha: 0
     - _BlendSrc: 1
     - _BlendSrcAlpha: 1
-    - _Brightness: 1
+    - _Brightness: 3
     - _BumpScale: 1
     - _ColorGrading: 1
     - _Contrast: 1
