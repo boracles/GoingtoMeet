@@ -291,20 +291,20 @@ public class CueDirector : MonoBehaviour
                 }
 
                 var list = GetWidesForAct(ActId.Scene11);
-                if (list == null || list.Length < 3 || !list[0] || !list[1] || !list[2])
+                if (list == null || list.Length < 4 || !list[0] || !list[1] || !list[2] || !list[3])
                 {
                     Debug.LogWarning("[CueDirector] Scene11 wides[0]/[1]/[2] missing (need 3).");
                     return;
                 }
 
-                // ✅ Q 누를 때마다 0 -> 1 -> 2 -> 0 순환 (Cat에서 처음 Q는 0)
-                int next = (scene11CurrentWideIndex < 0) ? 0 : (scene11CurrentWideIndex + 1) % 3;
+                int next = (scene11CurrentWideIndex < 0) ? 0 : (scene11CurrentWideIndex + 1) % 4;
                 scene11CurrentWideIndex = next;
 
                 // GO는 켜두기
                 list[0].gameObject.SetActive(true);
                 list[1].gameObject.SetActive(true);
                 list[2].gameObject.SetActive(true);
+                list[3].gameObject.SetActive(true);
 
                 // ✅ Priority로 전환 (Cinemachine Blend가 먹는다)
                 if (vcamCat)
