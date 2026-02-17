@@ -76,8 +76,31 @@ public class CueDirector : MonoBehaviour
 
         int idx = actMgr ? (int)actMgr.Current : 0;
         SetAct(actMgr ? IndexFromAct(actMgr.Current) : 0);
-
         ApplyDeltaGainForCurrentAct(true);
+
+        if (actMgr && actMgr.Current == ActId.Scene7 && catRoot)
+        {
+            // Act 적용 이후 1프레임
+            yield return null;
+
+            var s6 = GetWidesForAct(ActId.Scene6);
+            if (s6 != null && s6.Length >= 2 && s6[1])
+            {
+                s6[1].gameObject.SetActive(true);
+
+                // ✅ 1차 리셋
+                catRoot.SetPositionAndRotation(s6[1].transform.position, s6[1].transform.rotation);
+                scene6CurrentWideIndex = 1;
+                if (deltaSync) deltaSync.RebaseFromCurrent();
+
+                SetCat();
+
+                // ✅ 2차 리셋(다른 스크립트가 다음 프레임에 덮는 경우까지 이김)
+                yield return null;
+                catRoot.SetPositionAndRotation(s6[1].transform.position, s6[1].transform.rotation);
+                if (deltaSync) deltaSync.RebaseFromCurrent();
+            }
+        }
 
         // ✅ Scene6로 시작하면: 트리거 포즈로 러핑 이동 + Cat 뷰로 시작
         if (actMgr && actMgr.Current == ActId.Scene6 && catRoot && scene6StartPoint)
@@ -102,13 +125,23 @@ public class CueDirector : MonoBehaviour
             if (deltaSync) deltaSync.RebaseFromCurrent();
         }
 
-        if (actMgr && (actMgr.Current == ActId.Scene2 || actMgr.Current == ActId.Scene3)) SetCat();
+        if (actMgr && (actMgr.Current == ActId.Scene2 || actMgr.Current == ActId.Scene3))
+        {
+            SetCat();
+        }
         else if (actMgr && actMgr.Current == ActId.Scene6)
         {
             // Scene6는 위에서 ForceCatViewResetCycle로 이미 Cat 고정했으니 그대로 둔다
         }
-        else SetWide();
-
+        else if (actMgr && actMgr.Current == ActId.Scene7)
+        {
+            // ✅ Scene7은 CatView로 시작
+            SetCat();
+        }
+        else
+        {
+            SetWide();
+        }
 
     }
 
@@ -136,21 +169,36 @@ public class CueDirector : MonoBehaviour
                     return;
                 }
 
-                // ✅ 첫 Q는 0, 이후 0<->1 토글
+                // ✅ 1st Q => 0, 2nd Q => 1, 이후 토글
                 int next = (scene6CurrentWideIndex < 0) ? 0 : 1 - scene6CurrentWideIndex;
                 scene6CurrentWideIndex = next;
 
-                // ✅ 여기서 '무조건' 바뀌게 강제: 둘 다 끄고 하나만 켠다
-                // (ActSceneManager가 꺼놨을 수도 있으니 GO는 켜둠)
+                // 혹시 Act가 꺼놨을 수 있으니 GO는 켜둠
                 list[0].gameObject.SetActive(true);
                 list[1].gameObject.SetActive(true);
 
-                // Cat은 와이드 중엔 끔
+                // Wide 토글 중엔 CatCam은 끔
                 if (vcamCat) vcamCat.enabled = false;
 
+                // ✅ 카메라 강제 전환(둘 다 끄고 하나만 켠다)
                 list[0].enabled = false;
                 list[1].enabled = false;
                 list[next].enabled = true;
+
+                // ✅ Wide_2로 들어갈 때: 고양이 이동 + 델타싱크 리셋(항상 실행)
+                if (next == 1 && catRoot)
+                {
+                    // Wide_2 VCam의 Transform로 이동(즉시 or lerp)
+                    if (scene6SnapMoveTime <= 0f)
+                    {
+                        catRoot.SetPositionAndRotation(list[1].transform.position, list[1].transform.rotation);
+                        if (deltaSync) deltaSync.RebaseFromCurrent();
+                    }
+                    else
+                    {
+                        StartCoroutine(SnapCatTo(list[1].transform, scene6SnapMoveTime));
+                    }
+                }
 
                 isWide = true;
                 return;
@@ -180,7 +228,6 @@ public class CueDirector : MonoBehaviour
                     isWide = false;
 
                     // 상태 리셋(다음에 Scene6 돌아오면 꼬이지 않게)
-                    scene6CurrentWideIndex = -1;
                     scene6Wide2Snapped = false;
                     return;
                 }
@@ -190,8 +237,6 @@ public class CueDirector : MonoBehaviour
                     SetCat();
                     isWide = false;
 
-                    // ✅ Cat로 갔으면 "현재 와이드 상태 아님"으로 리셋
-                    scene6CurrentWideIndex = -1;
                     return;
                 }
             }
@@ -546,6 +591,5 @@ public class CueDirector : MonoBehaviour
         yield return StartCoroutine(MoveTransform(catRoot, goal, time));
         if (deltaSync) deltaSync.RebaseFromCurrent();
     }
-
 
 }
