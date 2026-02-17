@@ -9,7 +9,7 @@ public class CatCloseReact : MonoBehaviour
     public Animator man;
     public Animator woman;
 
-public float fadeTime = 0.2f;
+    public float fadeTime = 0.2f;
 
     [Header("When close")]
     public float closeDistance = 1.2f;   // 더 가까이 기준
@@ -32,16 +32,16 @@ public float fadeTime = 0.2f;
 
         if (!cat || !target || !man || !woman) return;
 
-       Vector3 a = cat.position;    a.y = 0f;
+        Vector3 a = cat.position; a.y = 0f;
         Vector3 b = target.position; b.y = 0f;
         float d = Vector3.Distance(a, b);
 
         if (d <= closeDistance)
         {
-// 자연스러운 블렌딩 시간(0.15~0.3 추천)
+            // 자연스러운 블렌딩 시간(0.15~0.3 추천)
 
-man.CrossFadeInFixedTime(stateName, fadeTime, 0);
-woman.CrossFadeInFixedTime(stateName, fadeTime, 0);
+            man.CrossFadeInFixedTime(stateName, fadeTime, 0);
+            woman.CrossFadeInFixedTime(stateName, fadeTime, 0);
 
             played = true;
         }

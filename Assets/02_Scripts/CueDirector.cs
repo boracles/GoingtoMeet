@@ -50,6 +50,10 @@ public class CueDirector : MonoBehaviour
         public CinemachineVirtualCamera[] wides; // 0=Wide_1, 1=Wide_2 ...
     }
 
+    [Header("Scene6: snap cat when Wide_2 shows")]
+    public bool scene6SnapCatOnWide2 = true;
+    public float scene6SnapMoveTime = 0.35f; // 0이면 즉시
+
     [Header("Wide Variants (per Act)")]
     public ActWideVariants[] wideVariantsByAct;
 
@@ -57,6 +61,9 @@ public class CueDirector : MonoBehaviour
     int wideVariantCursor = 0;    // Wide 들어갈 때마다 0,1,0,1...
 
     public StageToCityDeltaSync deltaSync;
+    bool scene6Wide2Snapped = false;
+    int scene6WideToggle = 0;
+    int scene6CurrentWideIndex = -1; // -1이면 지금 Cat 상태
 
     void Awake()
     {
@@ -111,7 +118,7 @@ public class CueDirector : MonoBehaviour
         {
             EnsureRT();
 
-            // Scene2는 기존 동작 유지(패닝)
+            // Scene2: Q = 패닝(기존 유지)
             if (actMgr != null && actMgr.Current == ActId.Scene2)
             {
                 if (scene2MoveCo != null) StopCoroutine(scene2MoveCo);
@@ -120,28 +127,103 @@ public class CueDirector : MonoBehaviour
                 return;
             }
 
-            if (isWide)
+            if (actMgr != null && actMgr.Current == ActId.Scene6)
             {
-                SetCat();
-                isWide = false;
-            }
-            else
-            {
-                SetWideVariant(wideVariantCursor);     // ✅ Wide 들어갈 때 0,1,0,1...
-                wideVariantCursor++;
+                var list = GetWidesForAct(ActId.Scene6);
+                if (list == null || list.Length < 2 || !list[0] || !list[1])
+                {
+                    Debug.LogWarning("[CueDirector] Scene6 wides[0]/wides[1] missing (null).");
+                    return;
+                }
+
+                // ✅ 첫 Q는 0, 이후 0<->1 토글
+                int next = (scene6CurrentWideIndex < 0) ? 0 : 1 - scene6CurrentWideIndex;
+                scene6CurrentWideIndex = next;
+
+                // ✅ 여기서 '무조건' 바뀌게 강제: 둘 다 끄고 하나만 켠다
+                // (ActSceneManager가 꺼놨을 수도 있으니 GO는 켜둠)
+                list[0].gameObject.SetActive(true);
+                list[1].gameObject.SetActive(true);
+
+                // Cat은 와이드 중엔 끔
+                if (vcamCat) vcamCat.enabled = false;
+
+                list[0].enabled = false;
+                list[1].enabled = false;
+                list[next].enabled = true;
+
                 isWide = true;
+                return;
             }
+
+            // 그 외 act는 기존 로직
+            CycleWideForCurrentAct();
+            isWide = true;
+            return;
         }
 
         if (Input.GetKeyDown(KeyCode.W))
         {
             EnsureRT();
-            // 너 기존 W 로직 유지하되, Cat로 강제하면 상태도 맞춰줘
-            // (원하면 W는 항상 Cat로)
+
+            if (actMgr != null && actMgr.Current == ActId.Scene6)
+            {
+                // ✅ Wide_2(인덱스 1)를 본 다음에만 Scene7로 넘어감
+                if (scene6CurrentWideIndex == 1)
+                {
+                    actMgr.SwitchActImmediate(ActId.Scene7);
+                    SetAct(IndexFromAct(ActId.Scene7));
+                    ApplyDeltaGainForCurrentAct(true);
+                    if (deltaSync) deltaSync.RebaseFromCurrent();
+
+                    SetCat(); // Scene7에서 Cat뷰 시작
+                    isWide = false;
+
+                    // 상태 리셋(다음에 Scene6 돌아오면 꼬이지 않게)
+                    scene6CurrentWideIndex = -1;
+                    scene6Wide2Snapped = false;
+                    return;
+                }
+                else
+                {
+                    // Wide_1 또는 Cat 상태면 그냥 Cat뷰만
+                    SetCat();
+                    isWide = false;
+
+                    // ✅ Cat로 갔으면 "현재 와이드 상태 아님"으로 리셋
+                    scene6CurrentWideIndex = -1;
+                    return;
+                }
+            }
+
             SetCat();
             isWide = false;
         }
     }
+
+
+    void CycleWideForCurrentAct()
+    {
+        var list = (actMgr != null) ? GetWidesForAct(actMgr.Current) : null;
+
+        if (list == null || list.Length == 0)
+        {
+            Debug.LogWarning($"[CueDirector] No wide variants for act={actMgr?.Current}. Fallback SetWide()");
+            SetWide();
+            return;
+        }
+
+        // ✅ 여기서 길이 확인이 핵심
+        int idx = wideVariantCursor % list.Length;
+
+        Debug.Log($"[CueDirector] Act={actMgr.Current} listLen={list.Length} cursor={wideVariantCursor} -> idx={idx} cam={(list[idx] ? list[idx].name : "NULL")}");
+
+        SetWideVariant(idx);
+
+        // ✅ 커서도 안전하게 순환
+        wideVariantCursor = (wideVariantCursor + 1) % list.Length;
+    }
+
 
     void EnsureRT()
     {
@@ -159,12 +241,16 @@ public class CueDirector : MonoBehaviour
     public void ForceCatViewResetCycle(bool resetCycle = true)
     {
         if (resetCycle)
-        {
-            wideVariantCursor = 0; // 다음 Wide는 0(_1)부터
-        }
+            wideVariantCursor = 0;
 
         isWide = false;
         SetCat();
+
+        if (actMgr != null && actMgr.Current == ActId.Scene6)
+        {
+            scene6Wide2Snapped = false;
+            scene6CurrentWideIndex = -1; // ✅ 추가
+        }
     }
 
     void ApplyActWide(int actIndex)
@@ -275,7 +361,7 @@ public class CueDirector : MonoBehaviour
     public void SetCat()
     {
         EnsureRT();
-
+        if (vcamCat) vcamCat.enabled = true;
         if (scene2MoveCo != null) { StopCoroutine(scene2MoveCo); scene2MoveCo = null; }
 
         if (vcamCat) vcamCat.Priority = 30;
@@ -387,11 +473,11 @@ public class CueDirector : MonoBehaviour
     void SetWideVariant(int variantIndex)
     {
         EnsureRT();
-
+        if (actMgr != null && actMgr.Current == ActId.Scene6) return;
         if (scene2MoveCo != null) { StopCoroutine(scene2MoveCo); scene2MoveCo = null; }
 
-        // Cat 내리기
-        if (vcamCat) vcamCat.Priority = 5;
+        if (vcamCat) vcamCat.enabled = false;
+
 
         // ✅ 다른 wide들 잔여 priority 제거(카메라 싸움 방지)
         if (wideByAct != null)
@@ -414,13 +500,52 @@ public class CueDirector : MonoBehaviour
         var list = (actMgr != null) ? GetWidesForAct(actMgr.Current) : null;
         if (list == null || list.Length == 0) { SetWide(); return; } // fallback
 
-        // 전부 내리고
-        for (int i = 0; i < list.Length; i++)
-            if (list[i]) list[i].Priority = 1;
+        // ✅ Scene6 wide는 0/1만 확실히 토글 (명시적으로 서로 반대로)
+        int idx = Mathf.Clamp(variantIndex, 0, list.Length - 1);
 
-        // 선택한 것만 올리기
-        int idx = Mathf.Abs(variantIndex) % list.Length;
-        if (list[idx]) list[idx].Priority = 20;
+        if (list.Length >= 2 && list[0] && list[1])
+        {
+            // 둘 다 먼저 내리고
+            list[0].Priority = 1;
+            list[1].Priority = 1;
+
+            // 선택만 크게 올리기
+            if (idx == 0) list[0].Priority = 200;
+            else list[1].Priority = 200;
+        }
+        else
+        {
+            // fallback (원래 방식)
+            for (int i = 0; i < list.Length; i++)
+                if (list[i]) list[i].Priority = 1;
+
+            if (list[idx]) list[idx].Priority = 200;
+        }
+
+
+        // ✅ Scene6에서 Wide_2(인덱스 1)가 뜨는 순간, 그 VCam 포즈로 고양이도 이동 + 델타싱크 리베이스
+        if (scene6SnapCatOnWide2 &&
+          actMgr != null && actMgr.Current == ActId.Scene6 &&
+          idx == 1 && !scene6Wide2Snapped && catRoot && list[idx])
+        {
+            scene6Wide2Snapped = true;
+            if (scene6SnapMoveTime <= 0f)
+            {
+                catRoot.SetPositionAndRotation(list[idx].transform.position, list[idx].transform.rotation);
+                if (deltaSync) deltaSync.RebaseFromCurrent();
+            }
+            else
+            {
+                StartCoroutine(SnapCatTo(list[idx].transform, scene6SnapMoveTime));
+            }
+        }
     }
+
+    IEnumerator SnapCatTo(Transform goal, float time)
+    {
+        yield return StartCoroutine(MoveTransform(catRoot, goal, time));
+        if (deltaSync) deltaSync.RebaseFromCurrent();
+    }
+
 
 }
