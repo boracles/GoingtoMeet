@@ -5,6 +5,7 @@ public class CatLookIK : MonoBehaviour
 {
     public CatApproachZone zone;
     public Transform cat;
+    public Transform lookTarget;   // 🔥 cityHead 또는 CatCamTarget 넣기
 
     Animator anim;
 
@@ -15,13 +16,13 @@ public class CatLookIK : MonoBehaviour
 
     void OnAnimatorIK(int layerIndex)
     {
-        if (!zone || !zone.catInside || !cat)
+        if (!zone || !zone.catInside)
         {
             anim.SetLookAtWeight(0f);
             return;
         }
 
         anim.SetLookAtWeight(1f, 0.3f, 1f, 0.7f, 0.6f);
-        anim.SetLookAtPosition(cat.position);
+        anim.SetLookAtPosition(lookTarget ? lookTarget.position : cat.position);
     }
 }

@@ -32,7 +32,10 @@ public float fadeTime = 0.2f;
 
         if (!cat || !target || !man || !woman) return;
 
-        float d = Vector3.Distance(cat.position, target.position);
+       Vector3 a = cat.position;    a.y = 0f;
+        Vector3 b = target.position; b.y = 0f;
+        float d = Vector3.Distance(a, b);
+
         if (d <= closeDistance)
         {
 // 자연스러운 블렌딩 시간(0.15~0.3 추천)
