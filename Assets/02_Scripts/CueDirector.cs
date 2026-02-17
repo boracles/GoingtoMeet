@@ -74,6 +74,7 @@ public class CueDirector : MonoBehaviour
     bool scene6Wide2Snapped = false;
     int scene6WideToggle = 0;
     int scene6CurrentWideIndex = -1; // -1이면 지금 Cat 상태
+    int scene11CurrentWideIndex = -1; // -1=Cat, 0=Wide1
 
     void Awake()
     {
@@ -277,6 +278,44 @@ public class CueDirector : MonoBehaviour
                 isWide = true;
                 return;
             }
+            if (actMgr != null && actMgr.Current == ActId.Scene11)
+            {
+                // ✅ Scene6 wide 잔재 끄기 (Scene11에서 Scene6로 튀는 문제 차단)
+                var s6 = GetWidesForAct(ActId.Scene6);
+                if (s6 != null)
+                {
+                    for (int i = 0; i < s6.Length; i++)
+                        if (s6[i]) s6[i].enabled = false;
+                }
+
+                var list = GetWidesForAct(ActId.Scene11);
+                if (list == null || list.Length < 3 || !list[0] || !list[1] || !list[2])
+                {
+                    Debug.LogWarning("[CueDirector] Scene11 wides[0]/[1]/[2] missing (need 3).");
+                    return;
+                }
+
+                // ✅ Q 누를 때마다 0 -> 1 -> 2 -> 0 순환 (Cat에서 처음 Q는 0)
+                int next = (scene11CurrentWideIndex < 0) ? 0 : (scene11CurrentWideIndex + 1) % 3;
+                scene11CurrentWideIndex = next;
+
+                // GO는 켜두기
+                list[0].gameObject.SetActive(true);
+                list[1].gameObject.SetActive(true);
+                list[2].gameObject.SetActive(true);
+
+                // CatCam 끄고
+                if (vcamCat) vcamCat.enabled = false;
+
+                // ✅ 3개 다 끄고 하나만 켠다
+                list[0].enabled = false;
+                list[1].enabled = false;
+                list[2].enabled = false;
+                list[next].enabled = true;
+
+                isWide = true;
+                return;
+            }
 
             // 그 외 act는 기존 로직
             CycleWideForCurrentAct();
@@ -314,6 +353,29 @@ public class CueDirector : MonoBehaviour
                     return;
                 }
             }
+            if (actMgr != null && actMgr.Current == ActId.Scene11)
+            {
+                // ✅ Scene6 wide 잔재 끄기 (Scene11에서 Scene6로 튀는 문제 차단)
+                var s6 = GetWidesForAct(ActId.Scene6);
+                if (s6 != null)
+                {
+                    for (int i = 0; i < s6.Length; i++)
+                        if (s6[i]) s6[i].enabled = false;
+                }
+
+                var list = GetWidesForAct(ActId.Scene11);
+                if (list != null)
+                {
+                    for (int i = 0; i < list.Length; i++)
+                        if (list[i]) list[i].enabled = false;   // ✅ Wide들 확실히 끄기
+                }
+
+                SetCat();               // CatView로 복귀
+                isWide = false;
+                scene11CurrentWideIndex = -1;
+                return;
+            }
+
 
             SetCat();
             isWide = false;
@@ -370,6 +432,12 @@ public class CueDirector : MonoBehaviour
             scene6Wide2Snapped = false;
             scene6CurrentWideIndex = -1; // ✅ 추가
         }
+
+        if (actMgr != null && actMgr.Current == ActId.Scene11)
+        {
+            scene11CurrentWideIndex = -1;
+        }
+
     }
 
     void ApplyActWide(int actIndex)
