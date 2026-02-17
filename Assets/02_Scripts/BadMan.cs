@@ -38,7 +38,8 @@ public class BadMan : MonoBehaviour
     void Update()
     {
         if (!anim || !actMgr) return;
-        if (actMgr.Current != ActId.Scene8) return;
+        if (actMgr.Current != ActId.Scene9) return;
+
         if (busy) return;
 
         if (!Input.GetKeyDown(key)) return;

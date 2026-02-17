@@ -5,12 +5,20 @@ public class CrosswalkToScene9Trigger : MonoBehaviour
 {
     [Header("Refs")]
     public CueDirector cue;
-    public Transform snapTarget;   // 비우면 이 트리거(transform)
+    public Transform snapTarget;
+
+    [Header("Enable Next Trigger (Scene10)")]
+    public Collider scene10TriggerCollider;   // ✅ Scene10 트리거의 BoxCollider
+    public bool enableScene10TriggerOnFire = true;
+
+    [Header("Activate")]
+    public GameObject badManRoot;
+    public bool activateBadMan = true;
 
     [Header("Move (Lerp)")]
     public bool moveCat = true;
     public float yOffset = 0f;
-    public float moveTime = 0.35f;   // 0이면 즉시
+    public float moveTime = 0.35f;
 
     [Header("Condition")]
     public bool requireScene8 = true;
@@ -27,20 +35,20 @@ public class CrosswalkToScene9Trigger : MonoBehaviour
         fired = true;
 
         if (!cue || !cue.actMgr) return;
-
-        // ✅ Scene8일 때만
         if (requireScene8 && cue.actMgr.Current != ActId.Scene8) return;
 
-        // 1) Scene9 진입
+        // ✅ Scene9로 넘어갈 때 Scene10 트리거 콜라이더 켜기
+        if (enableScene10TriggerOnFire && scene10TriggerCollider)
+            scene10TriggerCollider.enabled = true;
+
+        // ✅ BadMan 활성화
+        if (activateBadMan && badManRoot)
+            badManRoot.SetActive(true);
+
         cue.actMgr.SwitchActImmediate(ActId.Scene9);
-
-        // 2) Act 반영
         cue.SetAct(cue.IndexFromAct(ActId.Scene9));
-
-        // 3) Scene9 gain 적용
         cue.ApplyDeltaGainForCurrentAct(true);
 
-        // 4) 트리거(또는 snapTarget) 포즈로 러핑 이동
         if (moveCat && cue.catRoot)
             StartCoroutine(MoveThenReset());
         else
@@ -84,10 +92,7 @@ public class CrosswalkToScene9Trigger : MonoBehaviour
 
     void AfterMoveReset()
     {
-        // 5) 델타싱크 기준 리셋(되돌아감 방지)
         if (cue.deltaSync) cue.deltaSync.RebaseFromCurrent();
-
-        // 6) Scene9 시작 뷰 + 토글 사이클 리셋
         cue.ForceCatViewResetCycle(true);
     }
 }
