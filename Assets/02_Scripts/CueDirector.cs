@@ -57,6 +57,12 @@ public class CueDirector : MonoBehaviour
     [Header("Wide Variants (per Act)")]
     public ActWideVariants[] wideVariantsByAct;
 
+    [Header("Scene8 Start (snap/lerp to trigger pose)")]
+    public Transform scene8StartPoint;       // Scene8 Trigger 위치/회전 마커(트리거 transform 또는 별도 snapTarget)
+    public float scene8StartMoveTime = 0.6f; // 러핑 시간(초)
+    public bool scene8DoubleRebase = true;   // 다음 프레임 덮어쓰기까지 이기고 싶으면 켜
+
+
     bool isWide = false;          // 현재 뷰 상태
     int wideVariantCursor = 0;    // Wide 들어갈 때마다 0,1,0,1...
 
@@ -118,6 +124,36 @@ public class CueDirector : MonoBehaviour
             if (deltaSync) deltaSync.RebaseFromCurrent();
         }
 
+        // ✅ Scene8로 시작하면: 트리거 포즈로 러핑 이동 + Cat 뷰로 시작
+        if (actMgr && actMgr.Current == ActId.Scene8 && catRoot && scene8StartPoint)
+        {
+            // Cat 뷰로 고정 + 토글 사이클 리셋
+            ForceCatViewResetCycle(true);
+
+            // Scene8 gain 적용(테이블 값 반영)
+            ApplyDeltaGainForCurrentAct(false);
+
+            // 러핑 이동(0이면 즉시)
+            if (scene8StartMoveTime <= 0f)
+            {
+                catRoot.SetPositionAndRotation(scene8StartPoint.position, scene8StartPoint.rotation);
+            }
+            else
+            {
+                yield return StartCoroutine(MoveTransform(catRoot, scene8StartPoint, scene8StartMoveTime));
+            }
+
+            // 델타싱크 기준 리셋(되돌아감 방지)
+            if (deltaSync) deltaSync.RebaseFromCurrent();
+
+            // ✅ 다른 스크립트가 다음 프레임에 덮는 경우까지 방지(선택)
+            if (scene8DoubleRebase)
+            {
+                yield return null;
+                catRoot.SetPositionAndRotation(scene8StartPoint.position, scene8StartPoint.rotation);
+                if (deltaSync) deltaSync.RebaseFromCurrent();
+            }
+        }
 
         if (actMgr && actMgr.Current == ActId.Scene3 && catRoot && catEndPoint)
         {
@@ -137,6 +173,10 @@ public class CueDirector : MonoBehaviour
         {
             // ✅ Scene7은 CatView로 시작
             SetCat();
+        }
+        else if (actMgr && actMgr.Current == ActId.Scene8)   // ✅ 이 줄 추가
+        {
+            SetCat();                                        // ✅ 이 줄 추가
         }
         else
         {
