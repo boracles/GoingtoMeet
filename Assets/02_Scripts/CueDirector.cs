@@ -166,6 +166,8 @@ public class CueDirector : MonoBehaviour
             ForceCatViewResetCycle(true);
             ApplyDeltaGainForCurrentAct(false);
 
+            scene11CurrentWideIndex = -1;
+
             if (scene11StartMoveTime <= 0f)
             {
                 catRoot.SetPositionAndRotation(scene11StartPoint.position, scene11StartPoint.rotation);
@@ -304,14 +306,23 @@ public class CueDirector : MonoBehaviour
                 list[1].gameObject.SetActive(true);
                 list[2].gameObject.SetActive(true);
 
-                // CatCam 끄고
-                if (vcamCat) vcamCat.enabled = false;
+                // ✅ Priority로 전환 (Cinemachine Blend가 먹는다)
+                if (vcamCat)
+                {
+                    vcamCat.enabled = true;    // Cat vcam은 계속 enabled 유지
+                    vcamCat.Priority = 10;     // Wide일 땐 낮춤
+                }
 
-                // ✅ 3개 다 끄고 하나만 켠다
-                list[0].enabled = false;
-                list[1].enabled = false;
-                list[2].enabled = false;
-                list[next].enabled = true;
+                for (int i = 0; i < list.Length; i++)
+                {
+                    if (!list[i]) continue;
+                    list[i].enabled = true;    // Wide들도 enabled 유지
+                    list[i].Priority = 20;     // 기본 wide
+                }
+
+                // 선택 wide만 최상
+                list[next].Priority = 100;
+
 
                 isWide = true;
                 return;
@@ -372,7 +383,6 @@ public class CueDirector : MonoBehaviour
 
                 SetCat();               // CatView로 복귀
                 isWide = false;
-                scene11CurrentWideIndex = -1;
                 return;
             }
 
@@ -432,12 +442,6 @@ public class CueDirector : MonoBehaviour
             scene6Wide2Snapped = false;
             scene6CurrentWideIndex = -1; // ✅ 추가
         }
-
-        if (actMgr != null && actMgr.Current == ActId.Scene11)
-        {
-            scene11CurrentWideIndex = -1;
-        }
-
     }
 
     void ApplyActWide(int actIndex)
