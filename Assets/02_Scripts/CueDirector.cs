@@ -62,6 +62,10 @@ public class CueDirector : MonoBehaviour
     public float scene8StartMoveTime = 0.6f; // 러핑 시간(초)
     public bool scene8DoubleRebase = true;   // 다음 프레임 덮어쓰기까지 이기고 싶으면 켜
 
+    [Header("Scene11 Start (snap/lerp to trigger pose)")]
+    public Transform scene11StartPoint;       // Scene11 시작 트리거 마커(Transform)
+    public float scene11StartMoveTime = 0.6f; // 러핑 시간(초)
+    public bool scene11DoubleRebase = true;   // 다음 프레임 덮어쓰기까지 방지
 
     bool isWide = false;          // 현재 뷰 상태
     int wideVariantCursor = 0;    // Wide 들어갈 때마다 0,1,0,1...
@@ -155,6 +159,32 @@ public class CueDirector : MonoBehaviour
             }
         }
 
+        // ✅ Scene11로 시작하면: 트리거 포즈로 러핑 이동 + Cat 뷰로 시작
+        if (actMgr && actMgr.Current == ActId.Scene11 && catRoot && scene11StartPoint)
+        {
+            ForceCatViewResetCycle(true);
+            ApplyDeltaGainForCurrentAct(false);
+
+            if (scene11StartMoveTime <= 0f)
+            {
+                catRoot.SetPositionAndRotation(scene11StartPoint.position, scene11StartPoint.rotation);
+            }
+            else
+            {
+                yield return StartCoroutine(MoveTransform(catRoot, scene11StartPoint, scene11StartMoveTime));
+            }
+
+            if (deltaSync) deltaSync.RebaseFromCurrent();
+
+            if (scene11DoubleRebase)
+            {
+                yield return null;
+                catRoot.SetPositionAndRotation(scene11StartPoint.position, scene11StartPoint.rotation);
+                if (deltaSync) deltaSync.RebaseFromCurrent();
+            }
+        }
+
+
         if (actMgr && actMgr.Current == ActId.Scene3 && catRoot && catEndPoint)
         {
             catRoot.SetPositionAndRotation(catEndPoint.position, catEndPoint.rotation);
@@ -177,6 +207,10 @@ public class CueDirector : MonoBehaviour
         else if (actMgr && actMgr.Current == ActId.Scene8)   // ✅ 이 줄 추가
         {
             SetCat();                                        // ✅ 이 줄 추가
+        }
+        else if (actMgr && actMgr.Current == ActId.Scene11)
+        {
+            SetCat();
         }
         else
         {
