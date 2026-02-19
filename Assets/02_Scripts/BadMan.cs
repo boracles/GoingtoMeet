@@ -38,10 +38,19 @@ public class BadMan : MonoBehaviour
     void Update()
     {
         if (!anim || !actMgr) return;
-        if (actMgr.Current != ActId.Scene9) return;
+
+        // ✅ Scene9 밖이면 상태/잔상 리셋 후 종료 (돌아왔을 때 자동 실행/꼬임 방지)
+        if (actMgr.Current != ActId.Scene9)
+        {
+            if (busy)
+            {
+                StopAllCoroutines();
+                busy = false;
+            }
+            return;
+        }
 
         if (busy) return;
-
         if (!Input.GetKeyDown(key)) return;
 
         PlayNext();

@@ -32,6 +32,11 @@ public class ConvenienceClerk : MonoBehaviour
     [SerializeField] private bool teleportOnDo2End = true;
     [SerializeField] private float moveSpeed = 2.5f;
 
+    [Header("Act Gate (only run in this Act)")]
+    [SerializeField] private ActSceneManager actMgr;
+    [SerializeField] private ActId onlyAct = ActId.Scene11;
+    [SerializeField] private bool resetWhenNotInAct = true;
+
     private bool wasPlayingDo2 = false;
     private bool moveToSpot = false;
 
@@ -46,58 +51,74 @@ public class ConvenienceClerk : MonoBehaviour
         if (!anim) anim = GetComponent<Animator>();
     }
 
-    void Update()
+   void Update()
+{
+    // ✅ Scene11이 아닐 때는 입력/연출이 절대 안 먹게 막기 + 잔상 리셋
+    if (actMgr != null && actMgr.Current != ActId.Scene11)
     {
-        var st = anim.GetCurrentAnimatorStateInfo(0);
+        // (선택) 밖으로 나가면 벚꽃 꺼서 "돌아오면 이미 켜져있음" 방지
+        if (blossom && blossom.activeSelf) blossom.SetActive(false);
 
-        if (st.IsName("Do1") || st.IsName("Base Layer.Do1"))
-        {
-            wasPlayingDo1 = true;
-        }
+        // 진행 중 플래그도 리셋(원하면)
+        moveToSpot = false;
+        rotateToTarget = false;
+        wasPlayingDo1 = false;
+        wasPlayingDo2 = false;
 
-        if (wasPlayingDo1 && (st.IsName(idleStateName) || st.IsName("Base Layer." + idleStateName)))
-        {
-            wasPlayingDo1 = false;
-            rotateToTarget = true;
-        }
-
-        // 회전 처리
-        if (rotateToTarget && lookTarget != null)
-        {
-            RotateTowardTarget();
-        }
-        if (st.IsName("Do2") || st.IsName("Base Layer.Do2"))
-        {
-            wasPlayingDo2 = true;
-        }
-
-
-        if (wasPlayingDo2 && (st.IsName(idleStateName) || st.IsName("Base Layer." + idleStateName)))
-        {
-            wasPlayingDo2 = false;
-            blossom.SetActive(true);
-            StartMoveAfterDo2();
-        }
-
-        // 입력 처리
-        if (PressedE())
-        {
-            if (step == 0)
-            {
-                anim.ResetTrigger(triggerAnim2);
-                anim.SetTrigger(triggerAnim1);
-                step = 1;
-            }
-            else
-            {
-                anim.ResetTrigger(triggerAnim1);
-                anim.SetTrigger(triggerAnim2);
-                step = 0;
-            }
-        }
-
-        if (moveToSpot) MoveTowardsSpot();
+        return;
     }
+
+    var st = anim.GetCurrentAnimatorStateInfo(0);
+
+    if (st.IsName("Do1") || st.IsName("Base Layer.Do1"))
+    {
+        wasPlayingDo1 = true;
+    }
+
+    if (wasPlayingDo1 && (st.IsName(idleStateName) || st.IsName("Base Layer." + idleStateName)))
+    {
+        wasPlayingDo1 = false;
+        rotateToTarget = true;
+    }
+
+    // 회전 처리
+    if (rotateToTarget && lookTarget != null)
+    {
+        RotateTowardTarget();
+    }
+
+    if (st.IsName("Do2") || st.IsName("Base Layer.Do2"))
+    {
+        wasPlayingDo2 = true;
+    }
+
+    if (wasPlayingDo2 && (st.IsName(idleStateName) || st.IsName("Base Layer." + idleStateName)))
+    {
+        wasPlayingDo2 = false;
+        if (blossom) blossom.SetActive(true);   // ✅ 널 체크
+        StartMoveAfterDo2();
+    }
+
+    // 입력 처리 (Scene11에서만 여기까지 내려오므로 안전)
+    if (PressedE())
+    {
+        if (step == 0)
+        {
+            anim.ResetTrigger(triggerAnim2);
+            anim.SetTrigger(triggerAnim1);
+            step = 1;
+        }
+        else
+        {
+            anim.ResetTrigger(triggerAnim1);
+            anim.SetTrigger(triggerAnim2);
+            step = 0;
+        }
+    }
+
+    if (moveToSpot) MoveTowardsSpot();
+}
+
 
     void RotateTowardTarget()
     {
