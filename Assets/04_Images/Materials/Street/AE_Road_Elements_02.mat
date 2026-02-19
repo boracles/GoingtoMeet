@@ -201,7 +201,7 @@ Material:
     - _BlendSrc: 1
     - _BlendSrcAlpha: 1
     - _BranchPhase: 0
-    - _Brightness: 1
+    - _Brightness: 2
     - _BumpScale: 1
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0

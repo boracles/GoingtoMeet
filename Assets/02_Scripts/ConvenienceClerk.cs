@@ -32,6 +32,9 @@ public class ConvenienceClerk : MonoBehaviour
     [SerializeField] private bool teleportOnDo2End = true;
     [SerializeField] private float moveSpeed = 2.5f;
 
+    [Header("Put Can")]
+    [SerializeField] private Transform putCanSpot; 
+
     [Header("Act Gate (only run in this Act)")]
     [SerializeField] private ActSceneManager actMgr;
     [SerializeField] private ActId onlyAct = ActId.Scene11;
@@ -201,6 +204,21 @@ public class ConvenienceClerk : MonoBehaviour
         if (!can) return;
         can.SetActive(true);
     }
+
+public void PutCan()
+{
+    if (!can) return;
+
+    // 1) 부모 제거 (어떤 값이든 상관없게, 아래에서 월드값을 강제로 덮어씀)
+    can.transform.SetParent(null, true);
+
+    // 2) 월드 위치 강제: (x, 0, z)
+    Vector3 p = putCanSpot ? putCanSpot.position : can.transform.position;
+    can.transform.position = new Vector3(p.x, 0f, p.z);
+
+    // 3) 월드 회전 강제: (0, 0, 0)
+    can.transform.rotation = Quaternion.identity;
+}
 
 
     bool PressedE()
