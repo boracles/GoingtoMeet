@@ -36,6 +36,10 @@ public class CueDirector : MonoBehaviour
     int currentAct = 0;
     Coroutine scene2MoveCo;
 
+    ActId _lastAct = (ActId)(-1);
+
+    bool scene6FirstQ = true;
+
     [System.Serializable]
     public class ActGain
     {
@@ -62,6 +66,11 @@ public class CueDirector : MonoBehaviour
 
     [Header("Wide Variants (per Act)")]
     public ActWideVariants[] wideVariantsByAct;
+
+    [Header("Scene5 Start (snap/lerp to trigger pose)")]
+    public Transform scene5StartPoint;       // Scene5 Trigger 위치/회전 마커
+    public float scene5StartMoveTime = 0.6f; // 0이면 즉시
+    public bool scene5DoubleRebase = true;   // 다음 프레임 덮어쓰기 방지
 
     [Header("Scene8 Start (snap/lerp to trigger pose)")]
     public Transform scene8StartPoint;       // Scene8 Trigger 위치/회전 마커(트리거 transform 또는 별도 snapTarget)
@@ -115,6 +124,31 @@ public class CueDirector : MonoBehaviour
                 // ✅ 2차 리셋(다른 스크립트가 다음 프레임에 덮는 경우까지 이김)
                 yield return null;
                 catRoot.SetPositionAndRotation(s6[1].transform.position, s6[1].transform.rotation);
+                if (deltaSync) deltaSync.RebaseFromCurrent();
+            }
+        }
+
+        // ✅ Scene5로 시작하면: 트리거 포즈로 러핑 이동 + Cat 뷰로 시작
+        if (actMgr && actMgr.Current == ActId.Scene5 && catRoot && scene5StartPoint)
+        {
+            ForceCatViewResetCycle(true);
+            ApplyDeltaGainForCurrentAct(false);
+
+            if (scene5StartMoveTime <= 0f)
+            {
+                catRoot.SetPositionAndRotation(scene5StartPoint.position, scene5StartPoint.rotation);
+            }
+            else
+            {
+                yield return StartCoroutine(MoveTransform(catRoot, scene5StartPoint, scene5StartMoveTime));
+            }
+
+            if (deltaSync) deltaSync.RebaseFromCurrent();
+
+            if (scene5DoubleRebase)
+            {
+                yield return null;
+                catRoot.SetPositionAndRotation(scene5StartPoint.position, scene5StartPoint.rotation);
                 if (deltaSync) deltaSync.RebaseFromCurrent();
             }
         }
@@ -229,6 +263,10 @@ public class CueDirector : MonoBehaviour
         {
             SetCat();
         }
+        else if (actMgr && actMgr.Current == ActId.Scene5)
+        {
+            SetCat();
+        }
         else if (actMgr && actMgr.Current == ActId.Scene6)
         {
             // Scene6는 위에서 ForceCatViewResetCycle로 이미 Cat 고정했으니 그대로 둔다
@@ -259,6 +297,14 @@ public class CueDirector : MonoBehaviour
 
     void Update()
     {
+        if (actMgr != null && actMgr.Current != _lastAct)
+        {
+            _lastAct = actMgr.Current;
+
+            if (_lastAct == ActId.Scene6)
+                ResetScene6ToggleState();
+        }
+
         if (Input.GetKeyDown(KeyCode.Q))
         {
             EnsureRT();
@@ -273,29 +319,64 @@ public class CueDirector : MonoBehaviour
             }
 
             if (actMgr != null && actMgr.Current == ActId.Scene6)
+{
+            // ✅ Scene11 wide 잔재 제거 (Scene6에서 Scene11로 튀는 문제 차단)
+            var s11 = GetWidesForAct(ActId.Scene11);
+            if (s11 != null)
             {
-                var list = GetWidesForAct(ActId.Scene6);
+                for (int i = 0; i < s11.Length; i++)
+                    if (s11[i])
+                    {
+                        s11[i].enabled = false;
+                        s11[i].Priority = 1;
+                    }
+            }
+
+            // ✅ CatCam 우선순위도 Scene6 기준으로 리셋
+            if (vcamCat) { vcamCat.enabled = true; vcamCat.Priority = 10; }
+
+            var list = GetWidesForAct(ActId.Scene6);
+
                 if (list == null || list.Length < 2 || !list[0] || !list[1])
                 {
                     Debug.LogWarning("[CueDirector] Scene6 wides[0]/wides[1] missing (null).");
                     return;
                 }
 
-                // ✅ 1st Q => 0, 2nd Q => 1, 이후 토글
-                int next = (scene6CurrentWideIndex < 0) ? 0 : 1 - scene6CurrentWideIndex;
-                scene6CurrentWideIndex = next;
+              int next;
+            if (scene6FirstQ)
+            {
+                next = 0;                 // ✅ 첫 Q는 무조건 Wide_1
+                scene6FirstQ = false;
+            }
+            else
+            {
+                next = (scene6CurrentWideIndex < 0) ? 0 : 1 - scene6CurrentWideIndex;
+            }
+             scene6CurrentWideIndex = next;
 
-                // 혹시 Act가 꺼놨을 수 있으니 GO는 켜둠
-                list[0].gameObject.SetActive(true);
-                list[1].gameObject.SetActive(true);
+            Debug.Log($"[Scene6 Q] prev={1-next} next={next} idxState={scene6CurrentWideIndex}");
+            Debug.Log($"[Scene6 Q] cam0={(list[0]?list[0].name:"NULL")} cam1={(list[1]?list[1].name:"NULL")} enabled0={list[0].enabled} enabled1={list[1].enabled}");
 
-                // Wide 토글 중엔 CatCam은 끔
-                if (vcamCat) vcamCat.enabled = false;
+            // GO는 켜두기
+            list[0].gameObject.SetActive(true);
+            list[1].gameObject.SetActive(true);
 
-                // ✅ 카메라 강제 전환(둘 다 끄고 하나만 켠다)
-                list[0].enabled = false;
-                list[1].enabled = false;
-                list[next].enabled = true;
+            // ✅ enabled는 둘 다 true로 유지 (Cinemachine은 Priority로 선택)
+            list[0].enabled = true;
+            list[1].enabled = true;
+
+            // ✅ vcamCat은 Wide일 때 낮게
+            if (vcamCat)
+            {
+                vcamCat.enabled = true;
+                vcamCat.Priority = 10;
+            }
+
+            // ✅ Scene6 wide 우선순위 강제 (이게 “고정”을 만든다)
+            list[0].Priority = 20;
+            list[1].Priority = 20;
+            list[next].Priority = 100;
 
                 // ✅ Wide_2로 들어갈 때: 고양이 이동 + 델타싱크 리셋(항상 실행)
                 if (next == 1 && catRoot)
@@ -465,12 +546,6 @@ public class CueDirector : MonoBehaviour
             outputCam.targetTexture = rtMain;
     }
 
-    public void SetAct(int actIndex)
-    {
-        currentAct = Mathf.Clamp(actIndex, 0, (wideByAct?.Length ?? 1) - 1);
-        ApplyActWide(currentAct);
-        EnsureRT();
-    }
     public void ForceCatViewResetCycle(bool resetCycle = true)
     {
         if (resetCycle)
@@ -616,6 +691,23 @@ public class CueDirector : MonoBehaviour
                     if (list[i]) list[i].Priority = 1;
             }
         }
+    }
+
+    public void SetAct(int actIndex)
+    {
+        currentAct = Mathf.Clamp(actIndex, 0, (wideByAct?.Length ?? 1) - 1);
+        ApplyActWide(currentAct);
+        EnsureRT();
+
+        if (actMgr != null && actMgr.Current == ActId.Scene6)
+            ResetScene6ToggleState();
+    }
+
+    void ResetScene6ToggleState()
+    {
+        scene6CurrentWideIndex = -1;
+        scene6Wide2Snapped = false;
+        scene6FirstQ = true;   // ✅ Scene6 들어온 직후 첫 Q 강제 Wide_1
     }
 
     public void GoScene2Cat(ActSceneManager mgr)

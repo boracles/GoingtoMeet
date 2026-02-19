@@ -66,6 +66,16 @@ public class CatLureSmoke : MonoBehaviour
     bool waypointReached = false;
     bool absorbing = false;
 
+    [Header("Pitch-follow height")]
+    public bool followPitchHeight = true;
+    public float pitchUpLift = 0.6f;        // 위를 볼 때 최대 추가 상승(m)
+    public float pitchDownDrop = 0.3f;      // 아래를 볼 때 최대 추가 하강(m) (클램프가 있어서 과하강 방지)
+    public float pitchResponse = 8f;        // 반응 속도
+    public float minYOffset = -0.5f;        // catView 기준 최소 Y 오프셋(이 아래로 못 내려감)
+
+    float pitchHeightAdd = 0f;
+
+
     Vector3 smoothVel;
     Vector3 desiredVel;
 
@@ -105,6 +115,25 @@ public class CatLureSmoke : MonoBehaviour
 
         Camera cam = viewCam ? viewCam : Camera.main;
 
+        // ✅ pitch(위/아래 보기)에 따른 높이 보정 (dynamicY 계산)
+        float dynamicY = heightOffset;
+
+        if (followPitchHeight)
+        {
+            float fy = Mathf.Clamp((cam ? cam.transform.forward.y : view.forward.y), -1f, 1f);
+
+            // 위로 볼수록 +lift, 아래로 볼수록 -drop
+            float targetAdd = (fy >= 0f) ? (fy * pitchUpLift) : (fy * pitchDownDrop); // fy 음수면 내려감
+
+            // 부드럽게 반응
+            pitchHeightAdd = Mathf.Lerp(pitchHeightAdd, targetAdd, 1f - Mathf.Exp(-pitchResponse * Time.deltaTime));
+
+            dynamicY += pitchHeightAdd;
+
+            // ✅ 아래로 내려갈 때 최소 오프셋 제한 (catView 기준 -0.5)
+            dynamicY = Mathf.Max(dynamicY, minYOffset);
+        }
+
         // --- forward (시야 기준, 수평) ---
         Vector3 fwd = view.forward;
         fwd.y = 0f;
@@ -132,12 +161,10 @@ public class CatLureSmoke : MonoBehaviour
         // ✅ 리드 거리
         float leadDist = Mathf.Clamp(d * leadFactor, minLead, maxLead);
 
-        // --- base pos (origin 기준) ---
-        Vector3 basePos = origin + dir * leadDist + Vector3.up * heightOffset;
-
+        Vector3 basePos = origin + dir * leadDist + Vector3.up * dynamicY;
         // ✅ 가까워질수록 연기가 타깃 근처로
         float bias = Mathf.InverseLerp(biasStartDist, biasEndDist, d);
-        Vector3 nearTargetPos = currentTarget.position - tgtDir * targetBackOff + Vector3.up * heightOffset;
+        Vector3 nearTargetPos = currentTarget.position - tgtDir * targetBackOff + Vector3.up * dynamicY;
 
         basePos = Vector3.Lerp(basePos, nearTargetPos, bias);
 
@@ -153,6 +180,10 @@ public class CatLureSmoke : MonoBehaviour
         if (keepInView && cam)
         {
             desired = KeepInViewportSoft(desired, cam, view, Mathf.Max(minForwardDist, leadDist), viewportPadX, viewportPadY);
+
+            // ✅ keepInView가 y를 눌러도 최소 높이 보장
+            float minWorldY = origin.y + minYOffset;
+            if (desired.y < minWorldY) desired.y = minWorldY;
         }
 
         // ✅ 목표 워프 완화(선택)

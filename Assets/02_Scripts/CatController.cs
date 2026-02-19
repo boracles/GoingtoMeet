@@ -32,6 +32,7 @@ public class CatController : MonoBehaviour
     [Header("Per Act Speed (optional)")]
     public bool useActSpeed = true;
 
+    public float scene5MoveSpeed = 1.8f; 
     public float scene10MoveSpeed = 6f;          // Scene10에서만 기본 이동 속도
   
     CharacterController controller;
@@ -139,8 +140,9 @@ public class CatController : MonoBehaviour
 
         if (useActSpeed && actMgr)
         {
-            // Scene10에서만 빠르게
-            speed = (actMgr.Current == ActId.Scene10) ? scene10MoveSpeed : baseMoveSpeed;
+            if (actMgr.Current == ActId.Scene10) speed = scene10MoveSpeed;
+            else if (actMgr.Current == ActId.Scene5) speed = scene5MoveSpeed;
+            else speed = baseMoveSpeed;
         }
 
         Vector3 planar = (transform.right * input.x + transform.forward * input.z) * speed;
