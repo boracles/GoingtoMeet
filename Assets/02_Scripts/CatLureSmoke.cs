@@ -78,27 +78,34 @@ public class CatLureSmoke : MonoBehaviour
     public ActId enableFromAct = ActId.Scene5;   // Scene5부터 활성
     public bool disableBeforeEnableAct = true;
 
+    [Header("Play: In-front distance")]
+    public float playAheadDist = 1.2f;     // 머리 앞 거리(1.0~1.6 추천)
+    public float playMinY = 0.25f;         // 머리 기준 최소 높이(너무 바닥으로 떨어지는 것 방지)
+
+
     [Header("Play Around (close hover)")]
     public float playSideAmp = 0.18f;     // 좌우 흔들 폭 (0.12~0.25)
     public float playUpAmp = 0.06f;       // 위아래 흔들 폭 (0.03~0.10)
     public float playFollowSmooth = 35f;  // 붙는 속도
 
-    [Header("Start Delay (play around)")]
-    public bool delayGuidanceOnEnable = true;
-    public Vector2 delayRange = new Vector2(2f, 5f);   // 2~5초
+    [Header("Scene5 Timeline")]
+    public float hide0_5 = 5f;
+    public float show5_13 = 8f;
+    public float hide13_15 = 2f;
 
     float pitchHeightAdd = 0f;
+    Coroutine timelineCo;
 
-    bool guiding = false;        // 유도 시작 여부
-    float delayEndTime = 0f;
-
-    bool delayPlayedOnce = false;
+    enum Phase { Off, Play, Guide }
+    Phase phase = Phase.Off;
 
     Vector3 smoothVel;
     Vector3 desiredVel;
 
     ParticleSystem[] ps;
     Renderer[] rends;
+
+    bool timelinePlayedThisEnable = false;
 
     void Awake()
     {
@@ -112,18 +119,29 @@ public class CatLureSmoke : MonoBehaviour
         if (!actMgr) return;
         bool shouldEnable = (actMgr != null) && (actMgr.Current >= enableFromAct);
 
-        if (!shouldEnable)
+      if (!shouldEnable)
         {
-            if (IsVisualOn()) SetVisual(false);  // ✅ 상태 바뀔 때만 끔
-            guiding = false;
+            if (timelineCo != null) { StopCoroutine(timelineCo); timelineCo = null; }
+
+            // ✅ 다음에 다시 Scene5 들어오면 타임라인 다시 돌게
+            timelinePlayedThisEnable = false;
+
+            phase = Phase.Off;
+            waypointReached = false;
+            absorbing = false;
+
+            SetVisual(false);
             return;
         }
         else
         {
-            if (!IsVisualOn())
+            // ✅ Scene5에 들어온 "최초 1번"만 타임라인 시작
+            if (!timelinePlayedThisEnable)
             {
-                SetVisual(true);      // ✅ 상태 바뀔 때만 켬
-                StartEnableDelay();   // ✅ 켜지는 순간에만 딜레이 시작
+                timelinePlayedThisEnable = true;
+
+                if (timelineCo != null) StopCoroutine(timelineCo);
+                timelineCo = StartCoroutine(Scene5Timeline());
             }
         }
 
@@ -144,21 +162,17 @@ public class CatLureSmoke : MonoBehaviour
                 waypointReached = true;
         }
 
-        // ✅ 딜레이: 2~5초 동안은 target 유도 로직을 안 돌리고 "놀기"
-        if (!guiding && delayGuidanceOnEnable)
+        if (phase == Phase.Off)
         {
-            if (Time.time >= delayEndTime)
-            {
-                guiding = true; // 이제부터 유도 시작
-            }
-            else
-            {
-                // 놀기: 고양이 주변에서만 맴돌기 (target 계산/waypoint 전환 없음)
-                PlayAroundCat();
-                return;
-            }
+            // 안 보이는 구간
+            return;
         }
 
+        if (phase == Phase.Play)
+        {
+            PlayAroundCat();
+            return;
+        }
 
         if (absorbing) return;
 
@@ -260,23 +274,47 @@ public class CatLureSmoke : MonoBehaviour
 
     void PlayAroundCat()
     {
-        Vector3 origin = cat.position;   // 🔥 view 말고 cat로 변경
+        // ✅ 기준을 cat이 아니라 catView(카메라 앵커)로 잡아야 "시야 안"이 됨
+        Transform view = (catView ? catView : cat);
+        Camera cam = viewCam ? viewCam : Camera.main;
 
-        Vector3 fwd = cat.forward;
+        Vector3 origin = view.position;
+
+        // view forward (수평)
+        Vector3 fwd = view.forward;
         fwd.y = 0f;
         if (fwd.sqrMagnitude < 0.0001f) fwd = Vector3.forward;
         fwd.Normalize();
 
         Vector3 right = Vector3.Cross(Vector3.up, fwd).normalized;
 
-        // 🔥 거의 몸에 붙는 거리
+        // ✅ 앞쪽으로 기본 거리 확보 (중요: 무조건 카메라 앞에)
+        float baseAhead = Mathf.Max(minForwardDist, playAheadDist);
+
         float side = Mathf.Sin(Time.time * 2.2f) * playSideAmp;
         float up   = Mathf.Sin(Time.time * 3.1f) * playUpAmp;
 
         Vector3 desired =
             origin
+            + fwd * baseAhead                 // ✅ 앞쪽
             + right * side
-            + Vector3.up * (0.35f + up);   // 🔥 고양이 몸통 높이로 고정
+            + Vector3.up * (0.35f + up);
+
+        // ✅ (여기!) desired 만든 직후 2줄 추가
+        desired = ClampInFrontOfCat(desired, origin, fwd, baseAhead);
+        if (desired.y < origin.y + playMinY) desired.y = origin.y + playMinY;
+
+        // ✅ 화면 밖이면 가장자리로 클램프
+        if (keepInView && cam)
+        {
+            desired = KeepInViewportSoft(desired, cam, view, baseAhead, viewportPadX, viewportPadY);
+
+            float minWorldY = origin.y + minYOffset;
+            if (desired.y < minWorldY) desired.y = minWorldY;
+        }
+
+        // ✅ 뒤로 못 가게 최종 클램프
+        desired = ClampInFrontOfCat(desired, origin, fwd, baseAhead);
 
         float smoothTime = Mathf.Max(0.001f, 1f / playFollowSmooth);
         Vector3 nextPos = Vector3.SmoothDamp(transform.position, desired, ref smoothVel, smoothTime, maxFollowSpeed);
@@ -292,9 +330,18 @@ public class CatLureSmoke : MonoBehaviour
         for (int i = 0; i < ps.Length; i++)
         {
             if (!ps[i]) continue;
-            if (on) { if (!ps[i].isPlaying) ps[i].Play(true); }
-            else    { ps[i].Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear); }
+
+            if (on)
+            {
+                ps[i].Clear(true);   // ✅ 누적/잔상 제거
+                ps[i].Play(true);    // ✅ 즉시 재생
+            }
+            else
+            {
+                ps[i].Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            }
         }
+
     }
 
     bool IsVisualOn()
@@ -303,22 +350,6 @@ public class CatLureSmoke : MonoBehaviour
             if (rends[i] && rends[i].enabled) return true;
         return false;
     }
-
-    void StartEnableDelay()
-    {
-        if (delayPlayedOnce) { guiding = true; return; }
-        delayPlayedOnce = true;
-        guiding = !delayGuidanceOnEnable ? true : false;
-        waypointReached = false; // 새로 유도 시작
-        absorbing = false;
-
-        if (delayGuidanceOnEnable)
-        {
-            float t = Random.Range(delayRange.x, delayRange.y);
-            delayEndTime = Time.time + t;
-        }
-    }
-
 
     static Vector3 ClampInFrontOfCat(Vector3 pos, Vector3 catPos, Vector3 catFwd, float minForward)
     {
@@ -355,6 +386,40 @@ public class CatLureSmoke : MonoBehaviour
         vp.y = Mathf.Clamp(vp.y, padY, 1f - padY);
 
         return cam.ViewportToWorldPoint(vp);
+    }
+
+    IEnumerator Scene5Timeline()
+    {
+        Debug.Log($"[SmokeTimeline] START t={Time.realtimeSinceStartup:F2}");
+        // t=0~5: 안 보임
+        phase = Phase.Off;
+        waypointReached = false;
+        absorbing = false;
+        SetVisual(false);
+
+        yield return new WaitForSecondsRealtime(hide0_5);
+
+        Debug.Log($"[SmokeTimeline] SHOW(Play) t={Time.realtimeSinceStartup:F2}");
+        // t=5~13: 보임 + play
+        phase = Phase.Play;
+        SetVisual(true);
+        yield return new WaitForSecondsRealtime(show5_13);
+
+        Debug.Log($"[SmokeTimeline] HIDE t={Time.realtimeSinceStartup:F2}");
+        // t=13~15: 다시 안 보임
+        phase = Phase.Off;
+        SetVisual(false);
+        yield return new WaitForSecondsRealtime(hide13_15);
+
+        Debug.Log($"[SmokeTimeline] SHOW(Guide) t={Time.realtimeSinceStartup:F2}");
+        // t=15~ : 다시 보임 + 유도 시작
+        phase = Phase.Guide;
+        waypointReached = false;
+        absorbing = false;
+        SetVisual(true);
+
+        // 여기서 코루틴 끝. 이후는 Update에서 Guide 로직이 계속 돌림.
+        timelineCo = null;
     }
 
     IEnumerator AbsorbSmoke()
