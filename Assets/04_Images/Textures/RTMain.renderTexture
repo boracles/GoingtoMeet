@@ -14,10 +14,10 @@ RenderTexture:
   serializedVersion: 6
   m_Width: 4096
   m_Height: 4096
-  m_AntiAliasing: 4
+  m_AntiAliasing: 1
   m_MipCount: -1
   m_DepthStencilFormat: 94
-  m_ColorFormat: 8
+  m_ColorFormat: 48
   m_MipMap: 0
   m_GenerateMips: 1
   m_SRGB: 0
@@ -36,4 +36,4 @@ RenderTexture:
     m_WrapW: 1
   m_Dimension: 2
   m_VolumeDepth: 1
-  m_ShadowSamplingMode: 2
+  m_ShadowSamplingMode: 0
