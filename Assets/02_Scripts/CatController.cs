@@ -27,12 +27,16 @@ public class CatController : MonoBehaviour
 
     [Header("Movement (WASD)")]
     public float moveSpeed = 3f;
-    public float sprintMultiplier = 1.6f;
     public float gravity = -20f;
 
+    [Header("Per Act Speed (optional)")]
+    public bool useActSpeed = true;
 
+    public float scene10MoveSpeed = 6f;          // Scene10에서만 기본 이동 속도
+  
     CharacterController controller;
     float verticalVelocity;
+    float baseMoveSpeed;
 
     float pitch; // head pitch offset
     Quaternion headBaseLocalRot;
@@ -40,12 +44,15 @@ public class CatController : MonoBehaviour
 
     int ignoreMouseFrames = 2;
 
+    public ActSceneManager actMgr;
+
     void Awake()
     {
         controller = GetComponent<CharacterController>();
         controller.center = new Vector3(0f, 0.35f, 0f);
         controller.height = 0.7f;
         controller.radius = 0.2f;
+        baseMoveSpeed = moveSpeed;
     }
 
     IEnumerator Start()
@@ -127,9 +134,15 @@ public class CatController : MonoBehaviour
         if (Input.GetKey(KeyCode.S)) v -= 1f;
 
         Vector3 input = Vector3.ClampMagnitude(new Vector3(h, 0f, v), 1f);
-        float speed = moveSpeed * (Input.GetKey(KeyCode.LeftShift) ? sprintMultiplier : 1f);
 
-        // ✅ 이동은 몸체 기준 (MouseX로 몸이 도니까 전진 방향도 자연스럽게 따라감)
+        float speed = moveSpeed;
+
+        if (useActSpeed && actMgr)
+        {
+            // Scene10에서만 빠르게
+            speed = (actMgr.Current == ActId.Scene10) ? scene10MoveSpeed : baseMoveSpeed;
+        }
+
         Vector3 planar = (transform.right * input.x + transform.forward * input.z) * speed;
 
         if (controller.isGrounded && verticalVelocity < 0f) verticalVelocity = -1f;
