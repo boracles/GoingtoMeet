@@ -13,11 +13,22 @@ MonoBehaviour:
   m_Name: CinemachineBlenderSettings
   m_EditorClassIdentifier: Cinemachine::Cinemachine.CinemachineBlenderSettings
   m_CustomBlends:
+  - m_From: VCam_Cat
+    m_To: VCam_Scene11_3
+    m_Blend:
+      m_Style: 1
+      m_Time: 30
+      m_CustomCurve:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 0
+        m_PostInfinity: 0
+        m_RotationOrder: 0
   - m_From: VCam_Scene11_3
     m_To: VCam_Scene11_4
     m_Blend:
       m_Style: 1
-      m_Time: 10
+      m_Time: 30
       m_CustomCurve:
         serializedVersion: 2
         m_Curve: []
