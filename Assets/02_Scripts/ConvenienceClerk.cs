@@ -51,74 +51,55 @@ public class ConvenienceClerk : MonoBehaviour
         if (!anim) anim = GetComponent<Animator>();
     }
 
-   void Update()
-{
-    // ✅ Scene11이 아닐 때는 입력/연출이 절대 안 먹게 막기 + 잔상 리셋
-    if (actMgr != null && actMgr.Current != ActId.Scene11)
+    void Update()
     {
-        // (선택) 밖으로 나가면 벚꽃 꺼서 "돌아오면 이미 켜져있음" 방지
-        if (blossom && blossom.activeSelf) blossom.SetActive(false);
-
-        // 진행 중 플래그도 리셋(원하면)
-        moveToSpot = false;
-        rotateToTarget = false;
-        wasPlayingDo1 = false;
-        wasPlayingDo2 = false;
-
-        return;
-    }
-
-    var st = anim.GetCurrentAnimatorStateInfo(0);
-
-    if (st.IsName("Do1") || st.IsName("Base Layer.Do1"))
-    {
-        wasPlayingDo1 = true;
-    }
-
-    if (wasPlayingDo1 && (st.IsName(idleStateName) || st.IsName("Base Layer." + idleStateName)))
-    {
-        wasPlayingDo1 = false;
-        rotateToTarget = true;
-    }
-
-    // 회전 처리
-    if (rotateToTarget && lookTarget != null)
-    {
-        RotateTowardTarget();
-    }
-
-    if (st.IsName("Do2") || st.IsName("Base Layer.Do2"))
-    {
-        wasPlayingDo2 = true;
-    }
-
-    if (wasPlayingDo2 && (st.IsName(idleStateName) || st.IsName("Base Layer." + idleStateName)))
-    {
-        wasPlayingDo2 = false;
-        if (blossom) blossom.SetActive(true);   // ✅ 널 체크
-        StartMoveAfterDo2();
-    }
-
-    // 입력 처리 (Scene11에서만 여기까지 내려오므로 안전)
-    if (PressedE())
-    {
-        if (step == 0)
+        // ✅ 지정 Act가 아닐 때는 입력/연출 차단 + 리셋
+        if (actMgr != null && actMgr.Current != onlyAct)
         {
-            anim.ResetTrigger(triggerAnim2);
-            anim.SetTrigger(triggerAnim1);
-            step = 1;
+            if (blossom && blossom.activeSelf) blossom.SetActive(false);
+
+            moveToSpot = false;
+            rotateToTarget = false;
+            wasPlayingDo1 = false;
+            wasPlayingDo2 = false;
+
+            step = 0;        // ✅ 중요: 다시 들어왔을 때 E가 먹게
+            isBusy = false;  // (사용 안 하지만 안전)
+
+            return;
         }
-        else
+
+        var st = anim.GetCurrentAnimatorStateInfo(0);
+
+        if (st.IsName("Do1") || st.IsName("Base Layer.Do1")) wasPlayingDo1 = true;
+
+        if (wasPlayingDo1 && (st.IsName(idleStateName) || st.IsName("Base Layer." + idleStateName)))
         {
-            anim.ResetTrigger(triggerAnim1);
-            anim.SetTrigger(triggerAnim2);
-            step = 0;
+            wasPlayingDo1 = false;
+            rotateToTarget = true;
         }
+
+        if (rotateToTarget && lookTarget != null) RotateTowardTarget();
+
+        if (st.IsName("Do2") || st.IsName("Base Layer.Do2")) wasPlayingDo2 = true;
+
+        if (wasPlayingDo2 && (st.IsName(idleStateName) || st.IsName("Base Layer." + idleStateName)))
+        {
+            wasPlayingDo2 = false;
+            if (step == 2) StartMoveAfterDo2();   // ✅ Do2 흐름일 때만
+        }
+
+        if (PressedE())
+        {
+            if (step >= 3) return;
+
+            if (step == 0) { anim.ResetTrigger(triggerAnim2); anim.SetTrigger(triggerAnim1); step = 1; }
+            else if (step == 1) { anim.ResetTrigger(triggerAnim1); anim.SetTrigger(triggerAnim2); step = 2; }
+            else if (step == 2) { if (blossom) blossom.SetActive(true); step = 3; }
+        }
+
+        if (moveToSpot) MoveTowardsSpot();
     }
-
-    if (moveToSpot) MoveTowardsSpot();
-}
-
 
     void RotateTowardTarget()
     {
