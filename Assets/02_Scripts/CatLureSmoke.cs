@@ -73,8 +73,26 @@ public class CatLureSmoke : MonoBehaviour
     public float pitchResponse = 8f;        // 반응 속도
     public float minYOffset = -0.5f;        // catView 기준 최소 Y 오프셋(이 아래로 못 내려감)
 
+    [Header("Act Gate")]
+    public ActSceneManager actMgr;
+    public ActId enableFromAct = ActId.Scene5;   // Scene5부터 활성
+    public bool disableBeforeEnableAct = true;
+
+    [Header("Play Around (close hover)")]
+    public float playSideAmp = 0.18f;     // 좌우 흔들 폭 (0.12~0.25)
+    public float playUpAmp = 0.06f;       // 위아래 흔들 폭 (0.03~0.10)
+    public float playFollowSmooth = 35f;  // 붙는 속도
+
+    [Header("Start Delay (play around)")]
+    public bool delayGuidanceOnEnable = true;
+    public Vector2 delayRange = new Vector2(2f, 5f);   // 2~5초
+
     float pitchHeightAdd = 0f;
 
+    bool guiding = false;        // 유도 시작 여부
+    float delayEndTime = 0f;
+
+    bool delayPlayedOnce = false;
 
     Vector3 smoothVel;
     Vector3 desiredVel;
@@ -86,10 +104,29 @@ public class CatLureSmoke : MonoBehaviour
     {
         ps = GetComponentsInChildren<ParticleSystem>(true);
         rends = GetComponentsInChildren<Renderer>(true);
+        if (!actMgr) actMgr = FindFirstObjectByType<ActSceneManager>();
     }
 
     void Update()
     {
+        if (!actMgr) return;
+        bool shouldEnable = (actMgr != null) && (actMgr.Current >= enableFromAct);
+
+        if (!shouldEnable)
+        {
+            if (IsVisualOn()) SetVisual(false);  // ✅ 상태 바뀔 때만 끔
+            guiding = false;
+            return;
+        }
+        else
+        {
+            if (!IsVisualOn())
+            {
+                SetVisual(true);      // ✅ 상태 바뀔 때만 켬
+                StartEnableDelay();   // ✅ 켜지는 순간에만 딜레이 시작
+            }
+        }
+
         if (!cat || !target) return;
 
         // ✅ 2단계 목표: waypoint -> table
@@ -106,6 +143,22 @@ public class CatLureSmoke : MonoBehaviour
             if (Vector3.Distance(c0, w0) <= waypointRadius)
                 waypointReached = true;
         }
+
+        // ✅ 딜레이: 2~5초 동안은 target 유도 로직을 안 돌리고 "놀기"
+        if (!guiding && delayGuidanceOnEnable)
+        {
+            if (Time.time >= delayEndTime)
+            {
+                guiding = true; // 이제부터 유도 시작
+            }
+            else
+            {
+                // 놀기: 고양이 주변에서만 맴돌기 (target 계산/waypoint 전환 없음)
+                PlayAroundCat();
+                return;
+            }
+        }
+
 
         if (absorbing) return;
 
@@ -204,6 +257,68 @@ public class CatLureSmoke : MonoBehaviour
         if (d <= arriveRadius && soupCenter)
             StartCoroutine(AbsorbSmoke());
     }
+
+    void PlayAroundCat()
+    {
+        Vector3 origin = cat.position;   // 🔥 view 말고 cat로 변경
+
+        Vector3 fwd = cat.forward;
+        fwd.y = 0f;
+        if (fwd.sqrMagnitude < 0.0001f) fwd = Vector3.forward;
+        fwd.Normalize();
+
+        Vector3 right = Vector3.Cross(Vector3.up, fwd).normalized;
+
+        // 🔥 거의 몸에 붙는 거리
+        float side = Mathf.Sin(Time.time * 2.2f) * playSideAmp;
+        float up   = Mathf.Sin(Time.time * 3.1f) * playUpAmp;
+
+        Vector3 desired =
+            origin
+            + right * side
+            + Vector3.up * (0.35f + up);   // 🔥 고양이 몸통 높이로 고정
+
+        float smoothTime = Mathf.Max(0.001f, 1f / playFollowSmooth);
+        Vector3 nextPos = Vector3.SmoothDamp(transform.position, desired, ref smoothVel, smoothTime, maxFollowSpeed);
+
+        transform.position = nextPos;
+    }
+
+    void SetVisual(bool on)
+    {
+        for (int i = 0; i < rends.Length; i++)
+            if (rends[i]) rends[i].enabled = on;
+
+        for (int i = 0; i < ps.Length; i++)
+        {
+            if (!ps[i]) continue;
+            if (on) { if (!ps[i].isPlaying) ps[i].Play(true); }
+            else    { ps[i].Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear); }
+        }
+    }
+
+    bool IsVisualOn()
+    {
+        for (int i = 0; i < rends.Length; i++)
+            if (rends[i] && rends[i].enabled) return true;
+        return false;
+    }
+
+    void StartEnableDelay()
+    {
+        if (delayPlayedOnce) { guiding = true; return; }
+        delayPlayedOnce = true;
+        guiding = !delayGuidanceOnEnable ? true : false;
+        waypointReached = false; // 새로 유도 시작
+        absorbing = false;
+
+        if (delayGuidanceOnEnable)
+        {
+            float t = Random.Range(delayRange.x, delayRange.y);
+            delayEndTime = Time.time + t;
+        }
+    }
+
 
     static Vector3 ClampInFrontOfCat(Vector3 pos, Vector3 catPos, Vector3 catFwd, float minForward)
     {
