@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: a2728e48f703f5b4d9759f9b3b39cb95
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 344882
+  packageName: Low Poly Animated Cats
+  packageVersion: 1.0
+  assetPath: Assets/polyperfect/Low Poly Animated Cats/Scripts/CreatureRotation.cs
+  uploadId: 856522

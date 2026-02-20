@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 4a87609599652fb4e82ee21f633b9e12
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 22100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 344882
+  packageName: Low Poly Animated Cats
+  packageVersion: 1.0
+  assetPath: Assets/polyperfect/Low Poly Animated Cats/Controllers/CTL_Cat_Mainecoon.overrideController
+  uploadId: 856522

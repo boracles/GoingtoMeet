@@ -26,6 +26,7 @@ public class CueDirector : MonoBehaviour
     public float scene10StartMoveTime = 0.6f; // 러핑 시간(초)
     public bool scene10DoubleRebase = true;   // 다음 프레임 덮어쓰기까지 방지
 
+
     int currentAct = 0;
 
     ActId _lastAct = (ActId)(-1);

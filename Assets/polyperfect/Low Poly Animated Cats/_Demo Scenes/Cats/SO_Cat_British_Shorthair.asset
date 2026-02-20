@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8920c7ee44c9cf429f0dd70a3ec41ea, type: 3}
+  m_Name: SO_Cat_British_Shorthair
+  m_EditorClassIdentifier: 
+  DisplayName: British Shorthair
+  modelPrefab: {fileID: 979022311028474928, guid: c8adc42629f393d4dba61c75633e3d1a, type: 3}
+  previewImage: {fileID: 21300000, guid: 5481123619613c54ba2c7c63eea4be0b, type: 3}
+  overrideAnimator: {fileID: 22100000, guid: d64abdf1a42a8774bb662db056cb8ee5, type: 2}
+  scale: 1

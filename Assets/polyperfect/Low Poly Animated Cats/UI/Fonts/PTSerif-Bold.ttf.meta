@@ -1,0 +1,28 @@
+fileFormatVersion: 2
+guid: 901fe054e7bac1d4ab6041bc1a806f2a
+TrueTypeFontImporter:
+  externalObjects: {}
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontNames:
+  - PT Serif
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  useLegacyBoundsCalculation: 0
+  shouldRoundAdvanceValue: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 344882
+  packageName: Low Poly Animated Cats
+  packageVersion: 1.0
+  assetPath: Assets/polyperfect/Low Poly Animated Cats/UI/Fonts/PTSerif-Bold.ttf
+  uploadId: 856522

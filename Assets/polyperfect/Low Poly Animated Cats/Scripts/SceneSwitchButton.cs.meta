@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 6c359f145a4aa2543951a2de19202211
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 344882
+  packageName: Low Poly Animated Cats
+  packageVersion: 1.0
+  assetPath: Assets/polyperfect/Low Poly Animated Cats/Scripts/SceneSwitchButton.cs
+  uploadId: 856522

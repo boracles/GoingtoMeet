@@ -1,0 +1,14 @@
+{
+    "name": "Polyperfect.LowPolyAnimatedFantasyCreatures",
+    "rootNamespace": "Polyperfect.LowPolyAnimatedFantasyCreatures",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

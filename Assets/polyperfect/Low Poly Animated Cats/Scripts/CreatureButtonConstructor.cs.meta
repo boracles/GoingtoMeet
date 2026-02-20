@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 9debc5a4067766745865759f0d4110ab
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 344882
+  packageName: Low Poly Animated Cats
+  packageVersion: 1.0
+  assetPath: Assets/polyperfect/Low Poly Animated Cats/Scripts/CreatureButtonConstructor.cs
+  uploadId: 856522

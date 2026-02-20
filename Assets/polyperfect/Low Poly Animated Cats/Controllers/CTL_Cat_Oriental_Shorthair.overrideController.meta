@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 728eda92443f02c4d9edf5f79a72acbf
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 22100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 344882
+  packageName: Low Poly Animated Cats
+  packageVersion: 1.0
+  assetPath: Assets/polyperfect/Low Poly Animated Cats/Controllers/CTL_Cat_Oriental_Shorthair.overrideController
+  uploadId: 856522

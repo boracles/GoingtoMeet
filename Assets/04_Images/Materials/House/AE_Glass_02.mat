@@ -312,7 +312,7 @@ Material:
     - _Color: {r: 1, g: 1, b: 1, a: 0.4}
     - _ColorAddSubDiff: {r: 1, g: 0, b: 0, a: 0}
     - _DissolveBorderColor: {r: 1, g: 1, b: 1, a: 1}
-    - _EmissionColor: {r: 1.8808651, g: 1.3455874, b: 0.8103097, a: 1}
+    - _EmissionColor: {r: 1.0541893, g: 0.8378816, b: 0.62157387, a: 1}
     - _GoochBrightColor: {r: 1, g: 1, b: 1, a: 1}
     - _GoochDarkColor: {r: 0, g: 0, b: 0, a: 1}
     - _IridescenceColor: {r: 1, g: 1, b: 1, a: 0.5}

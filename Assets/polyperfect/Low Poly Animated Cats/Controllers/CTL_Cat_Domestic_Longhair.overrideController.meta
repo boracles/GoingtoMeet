@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ca6b1753370692e4c9556a02b31254db
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 22100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 344882
+  packageName: Low Poly Animated Cats
+  packageVersion: 1.0
+  assetPath: Assets/polyperfect/Low Poly Animated Cats/Controllers/CTL_Cat_Domestic_Longhair.overrideController
+  uploadId: 856522
