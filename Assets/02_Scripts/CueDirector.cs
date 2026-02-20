@@ -9,20 +9,13 @@ public class CueDirector : MonoBehaviour
     public RenderTexture rtMain;      // RTMain
     public ActSceneManager actMgr;
 
-    [Header("Scene2 Move")]
-    public float scene2MoveDuration = 60.0f;
-
     [Header("Virtual cams")]
     public CinemachineVirtualCamera vcamCat;
     public CinemachineVirtualCamera[] wideByAct;    // [0]=Scene1Wide, [1]=None (권장)
     public CinemachineVirtualCamera wide2Start;     // Scene2 wide start (움직이는 주체)
-    public CinemachineVirtualCamera wide2End;       // Scene2 wide end   (목표 포즈)
-
+    
     [Header("Cat Teleport/Align (after Scene2 move ends)")]
     public Transform catRoot;         // 고양이(또는 고양이 Rig)의 루트
-    public Transform catEndPoint;     // Scene2에서 도착시키고 싶은 목표 포인트(위치+회전)
-    public bool teleportCatOnScene2End = true;
-    public float catEndMoveTime = 0f; // 0이면 즉시, >0이면 부드럽게 이동
 
     [Header("Scene6 Start (snap/lerp to trigger pose)")]
     public Transform scene6StartPoint;     // Scene6 Trigger 위치/회전 마커 (트리거 오브젝트 transform 또는 별도 snapTarget)
@@ -34,7 +27,6 @@ public class CueDirector : MonoBehaviour
     public bool scene10DoubleRebase = true;   // 다음 프레임 덮어쓰기까지 방지
 
     int currentAct = 0;
-    Coroutine scene2MoveCo;
 
     ActId _lastAct = (ActId)(-1);
 
@@ -278,12 +270,6 @@ public class CueDirector : MonoBehaviour
             }
         }
 
-        if (actMgr && actMgr.Current == ActId.Scene3 && catRoot && catEndPoint)
-        {
-            catRoot.SetPositionAndRotation(catEndPoint.position, catEndPoint.rotation);
-            if (deltaSync) deltaSync.RebaseFromCurrent();
-        }
-
         if (actMgr && (actMgr.Current == ActId.Scene2 || actMgr.Current == ActId.Scene3))
         {
             SetCat();
@@ -339,11 +325,16 @@ public class CueDirector : MonoBehaviour
         {
             EnsureRT();
 
-            // Scene2: Q = 패닝(기존 유지)
             if (actMgr != null && actMgr.Current == ActId.Scene2)
             {
-                if (scene2MoveCo != null) StopCoroutine(scene2MoveCo);
-                scene2MoveCo = StartCoroutine(Scene2WideMove());
+                // ✅ 다른 wide 잔재 전부 내리기 (카메라 싸움 방지)
+                if (wideByAct != null)
+                    for (int i = 0; i < wideByAct.Length; i++)
+                        if (wideByAct[i]) wideByAct[i].Priority = 1;
+
+                if (wide2Start) wide2Start.Priority = 100;
+                if (vcamCat) { vcamCat.enabled = true; vcamCat.Priority = 10; }
+
                 isWide = true;
                 return;
             }
@@ -486,7 +477,17 @@ public class CueDirector : MonoBehaviour
                 ApplyDeltaGainForCurrentAct(true);
                 if (deltaSync) deltaSync.RebaseFromCurrent();
 
+                if (wide2Start) wide2Start.Priority = 1;
+
                 SetCat();        // Scene2 시작 뷰 (원하면 SetWide로)
+                isWide = false;
+                return;
+            }
+
+            // ✅ Scene2: W = Cat뷰로 복귀
+            if (actMgr != null && actMgr.Current == ActId.Scene2)
+            {
+                SetCat();
                 isWide = false;
                 return;
             }
@@ -635,67 +636,6 @@ public class CueDirector : MonoBehaviour
             wideByAct[actIndex].Priority = 10;
     }
 
-    // Scene2 wide(Start->End) 패닝: wide2Start를 직접 이동
-    IEnumerator Scene2WideMove()
-    {
-        if (wide2Start == null || wide2End == null) yield break;
-
-        // Scene2Start만 라이브로 고정
-        if (vcamCat) vcamCat.Priority = 1;
-        wide2End.Priority = -100;   // End는 포즈 타깃으로만 사용
-        wide2Start.Priority = 100;
-
-        Transform camT = wide2Start.transform;
-        Vector3 fromPos = camT.position;
-        Quaternion fromRot = camT.rotation;
-
-        Vector3 toPos = wide2End.transform.position;
-        Quaternion toRot = wide2End.transform.rotation;
-
-        float dur = Mathf.Max(0.01f, scene2MoveDuration);
-        float t = 0f;
-
-        while (t < dur)
-        {
-            t += Time.deltaTime;
-            float u = Mathf.Clamp01(t / dur);
-            camT.position = Vector3.Lerp(fromPos, toPos, u);
-            camT.rotation = Quaternion.Slerp(fromRot, toRot, u);
-            yield return null;
-        }
-
-        camT.position = toPos;
-        camT.rotation = toRot;
-
-        scene2MoveCo = null;
-
-        if (teleportCatOnScene2End && catRoot && catEndPoint)
-        {
-            if (catEndMoveTime <= 0f)
-            {
-                catRoot.SetPositionAndRotation(catEndPoint.position, catEndPoint.rotation);
-            }
-            else
-            {
-                yield return StartCoroutine(MoveTransform(catRoot, catEndPoint, catEndMoveTime));
-            }
-
-            // ✅ 여기부터: "고양이 이동 완료" == Scene3 진입 조건
-            if (actMgr) actMgr.SwitchActImmediate(ActId.Scene3);
-            SetAct(IndexFromAct(ActId.Scene3));
-
-            // 델타싱크 기준 리셋(되돌아감 방지)
-            if (deltaSync) deltaSync.RebaseFromCurrent();
-
-            // ✅ Scene3 기준 gain 적용 + 델타싱크 리베이스
-            ApplyDeltaGainForCurrentAct(true);
-            if (deltaSync) deltaSync.RebaseFromCurrent();
-
-            // Scene3 시작 뷰(원하면)
-            SetCat(); // 또는 SetWide();
-        }
-    }
-
     public void SetWide()
     {
         EnsureRT();
@@ -707,21 +647,15 @@ public class CueDirector : MonoBehaviour
                 if (wideByAct[i]) wideByAct[i].Priority = 1;
         }
 
-        if (scene2MoveCo != null) { StopCoroutine(scene2MoveCo); scene2MoveCo = null; }
-
         if (vcamCat) vcamCat.Priority = 5;
 
-        // Scene2면 wide2Start를 wide로
         if (actMgr != null && actMgr.Current == ActId.Scene2)
         {
-            if (wide2End) wide2End.Priority = 1;
-            if (wide2Start) wide2Start.Priority = 20;
+            // Scene2의 wide는 Q에서만 켠다
             return;
         }
 
-        // Scene1/3 등은 wideByAct 사용
         if (wide2Start) wide2Start.Priority = 1;
-        if (wide2End) wide2End.Priority = 1;
 
         if (wideByAct != null && currentAct >= 0 && currentAct < wideByAct.Length && wideByAct[currentAct])
             wideByAct[currentAct].Priority = 20;
@@ -731,16 +665,13 @@ public class CueDirector : MonoBehaviour
     {
         EnsureRT();
         if (vcamCat) vcamCat.enabled = true;
-        if (scene2MoveCo != null) { StopCoroutine(scene2MoveCo); scene2MoveCo = null; }
-
+       
         if (vcamCat) vcamCat.Priority = 30;
 
         if (wideByAct != null && currentAct >= 0 && currentAct < wideByAct.Length && wideByAct[currentAct])
             wideByAct[currentAct].Priority = 1;
 
-        // Scene2 start/end은 내려둠
         if (wide2Start) wide2Start.Priority = 1;
-        if (wide2End) wide2End.Priority = 1;
 
         // ✅ 현재 Act의 wide variants도 내려둠 (Scene6_1/2 잔여 제거)
         if (actMgr != null)
@@ -778,7 +709,6 @@ public class CueDirector : MonoBehaviour
         ApplyDeltaGainForCurrentAct(true);
 
         if (wide2Start) wide2Start.Priority = 1;
-        if (wide2End) wide2End.Priority = 1;
 
         SetCat();
     }
@@ -860,8 +790,7 @@ public class CueDirector : MonoBehaviour
     {
         EnsureRT();
         if (actMgr != null && actMgr.Current == ActId.Scene6) return;
-        if (scene2MoveCo != null) { StopCoroutine(scene2MoveCo); scene2MoveCo = null; }
-
+      
         if (vcamCat) vcamCat.enabled = false;
 
 
@@ -872,16 +801,6 @@ public class CueDirector : MonoBehaviour
                 if (wideByAct[i]) wideByAct[i].Priority = 1;
         }
         if (wide2Start) wide2Start.Priority = 1;
-        if (wide2End) wide2End.Priority = 1;
-
-        // Scene2는 기존 규칙 유지
-        if (actMgr != null && actMgr.Current == ActId.Scene2)
-        {
-            // Q는 패닝으로 쓰는 기존 로직이면 여기서 return하지 말고 Update쪽에서 처리
-            if (wide2End) wide2End.Priority = 1;
-            if (wide2Start) wide2Start.Priority = 20;
-            return;
-        }
 
         var list = (actMgr != null) ? GetWidesForAct(actMgr.Current) : null;
         if (list == null || list.Length == 0) { SetWide(); return; } // fallback
