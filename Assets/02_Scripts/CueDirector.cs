@@ -80,6 +80,9 @@ public class CueDirector : MonoBehaviour
     public float scene11StartMoveTime = 0.6f; // 러핑 시간(초)
     public bool scene11DoubleRebase = true;   // 다음 프레임 덮어쓰기까지 방지
 
+    [Header("Scene1 Bubble (E toggle)")]
+    public GameObject bubbleInstance; // ✅ 씬에 미리 배치해둔 Bubble(비활성으로 시작)
+
     bool isWide = false;          // 현재 뷰 상태
     int wideVariantCursor = 0;    // Wide 들어갈 때마다 0,1,0,1...
 
@@ -321,6 +324,14 @@ public class CueDirector : MonoBehaviour
                 ResetScene6ToggleState();
         }
 
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            // Scene1에서만 동작
+            if (actMgr != null && actMgr.Current == ActId.Scene1)
+            {
+                ToggleScene1Bubble();
+            }
+        }
 
         if (Input.GetKeyDown(KeyCode.Q))
         {
@@ -565,6 +576,17 @@ public class CueDirector : MonoBehaviour
             SetCat();
             isWide = false;
         }
+    }
+
+    void ToggleScene1Bubble()
+    {
+        if (!bubbleInstance)
+        {
+            Debug.LogWarning("[CueDirector] bubbleInstance가 비어있음. 씬에 미리 만든 Bubble 오브젝트를 bubbleInstance에 할당해.");
+            return;
+        }
+
+        bubbleInstance.SetActive(!bubbleInstance.activeSelf);
     }
 
     void KillWidesForAct(ActId act)
