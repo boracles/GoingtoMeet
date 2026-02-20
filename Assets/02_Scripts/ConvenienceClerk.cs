@@ -28,7 +28,8 @@ public class ConvenienceClerk : MonoBehaviour
 
     [Header("Move After Do2")]
     [SerializeField] private Transform do2EndSpot;   // 이동(도착) 위치
-    [SerializeField] private GameObject blossom;   // 이동(도착) 위치
+    [SerializeField] private GameObject blossom;     // 벚꽃
+    [SerializeField] private GameObject house;       // ✅ 집 오브젝트 (여기에만 추가)
     [SerializeField] private bool teleportOnDo2End = true;
     [SerializeField] private float moveSpeed = 2.5f;
 
@@ -43,6 +44,9 @@ public class ConvenienceClerk : MonoBehaviour
     private bool wasPlayingDo2 = false;
     private bool moveToSpot = false;
 
+    private bool do2Requested = false;   // ✅ Do2를 내가 시켰는지(흐름 보호)
+    private bool do2Entered = false;     // ✅ 실제 Do2 state에 들어갔는지
+
     private bool wasPlayingDo1 = false;
     private bool rotateToTarget = false;
 
@@ -56,7 +60,6 @@ public class ConvenienceClerk : MonoBehaviour
 
     void Update()
     {
-        // ✅ 지정 Act가 아닐 때는 입력/연출 차단 + 리셋
         if (actMgr != null && actMgr.Current != onlyAct)
         {
             if (blossom && blossom.activeSelf) blossom.SetActive(false);
@@ -64,10 +67,13 @@ public class ConvenienceClerk : MonoBehaviour
             moveToSpot = false;
             rotateToTarget = false;
             wasPlayingDo1 = false;
-            wasPlayingDo2 = false;
 
-            step = 0;        // ✅ 중요: 다시 들어왔을 때 E가 먹게
-            isBusy = false;  // (사용 안 하지만 안전)
+            // ✅ Do2 추적 상태도 리셋
+            do2Requested = false;
+            do2Entered = false;
+
+            step = 0;
+            isBusy = false;
 
             return;
         }
@@ -84,21 +90,54 @@ public class ConvenienceClerk : MonoBehaviour
 
         if (rotateToTarget && lookTarget != null) RotateTowardTarget();
 
-        if (st.IsName("Do2") || st.IsName("Base Layer.Do2")) wasPlayingDo2 = true;
+       bool isDo2Now = st.IsName("Do2") || st.IsName("Base Layer.Do2");
 
-        if (wasPlayingDo2 && (st.IsName(idleStateName) || st.IsName("Base Layer." + idleStateName)))
+        // ✅ Do2를 내가 요청한 경우에만 추적한다
+        if (do2Requested)
         {
-            wasPlayingDo2 = false;
-            if (step == 2) StartMoveAfterDo2();   // ✅ Do2 흐름일 때만
+            // 1) Do2 state에 "진짜로" 들어간 순간을 잡는다
+            if (!do2Entered && isDo2Now)
+            {
+                do2Entered = true;
+            }
+
+            // 2) Do2에 들어갔다가 빠져나온 순간 = 종료
+            if (do2Entered && !isDo2Now)
+            {
+                do2Requested = false;
+                do2Entered = false;
+
+                if (step == 2) StartMoveAfterDo2();  // ✅ 여기서 텔레포트
+            }
         }
 
         if (PressedE())
         {
-            if (step >= 3) return;
+            if (step >= 4) return;
 
             if (step == 0) { anim.ResetTrigger(triggerAnim2); anim.SetTrigger(triggerAnim1); step = 1; }
-            else if (step == 1) { anim.ResetTrigger(triggerAnim1); anim.SetTrigger(triggerAnim2); step = 2; }
-            else if (step == 2) { if (blossom) blossom.SetActive(true); step = 3; }
+            
+            else if (step == 1)
+            {
+                anim.ResetTrigger(triggerAnim1);
+                anim.SetTrigger(triggerAnim2);
+                step = 2;
+
+                do2Requested = true;   // ✅ 내가 Do2를 시켰다
+                do2Entered = false;    // ✅ 아직 state 진입 전
+            }
+            
+            else if (step == 2)
+            {
+                if (blossom) blossom.SetActive(true);
+                if (house) house.SetActive(true);
+                step = 3;
+            }
+            else if (step == 3)
+            {
+                if (house) house.SetActive(false);
+                step = 4;
+            }
         }
 
         if (moveToSpot) MoveTowardsSpot();
@@ -132,6 +171,8 @@ public class ConvenienceClerk : MonoBehaviour
     void StartMoveAfterDo2()
     {
         if (!do2EndSpot) return;
+
+        if (anim) anim.applyRootMotion = false; // ✅ 덮어쓰기 방지
 
         if (teleportOnDo2End)
         {
