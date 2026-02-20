@@ -17,7 +17,7 @@ public class CatController : MonoBehaviour
     [Header("Pitch Limits (deg)")]
     public float minPitch = -35f;
     public float maxPitch = 35f;
-
+ 
     [Header("Input")]
     public float mouseSensitivity = 2f;
     public bool invertY = false;

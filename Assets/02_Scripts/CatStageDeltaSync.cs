@@ -1,160 +1,154 @@
 using UnityEngine;
 
-public class CatStageDeltaSync : MonoBehaviour
+[DefaultExecutionOrder(10000)] // 가능한 한 마지막에 적용
+[DisallowMultipleComponent]
+public class CatStageLookSyncOnly : MonoBehaviour
 {
     [Header("Source (City) -> Target (Stage)")]
-    public Transform cityCat;     // CatintheCity (움직임 원본)
-    public Transform stageCat;    // CatonStage   (무대에서 따라 움직일 대상)
+    public Transform cityCat;     // 도시 고양이 루트
+    public Transform stageCat;    // 무대 고양이 루트
 
-    [Header("Stage Bounds (world)")]
-    public Transform stageCenter; // 무대 중심(빈 오브젝트)
-    public float stageWidth = 7.8f;
-    public float stageDepth = 4.5f;
-
-    [Header("Delta Gain (shrink movement)")]
-    [Tooltip("도시에서 1m 움직일 때 무대에서 몇 m 움직일지")]
-    public float gainX = 0.25f;   // 좌우 축소 (0.1~0.5)
-    public float gainZ = 0.25f;   // 앞뒤 축소
-
-    [Header("Axis / Direction")]
-    public bool invertX = false;  // 추가 반전(옵션)
-    public bool invertZ = false;  // 추가 반전(옵션)
-
-    [Header("Rotation Sync (Yaw Mirrored)")]
+    [Header("Yaw (Body) Sync")]
     public bool syncYaw = true;
-    public float yawOffset = 0f;      // 필요 시 180 등
-    public float rotSmooth = 18f;
+    public bool mirrorYaw = false;     // 좌우 방향이 반대면 켜
+    public float yawOffset = 0f;       // 180 필요하면 여기
 
-    [Header("Smoothing")]
-    public float posSmooth = 18f;     // 0이면 즉시
+    [Tooltip("0이면 즉시, 높을수록 부드러움")]
+    public float yawSmooth = 18f;
 
-[Header("Head Pitch Sync (City -> Stage)")]
-public Transform cityHead;     // City cat head 본
-public Transform stageHead;    // Stage cat head 본
-public float headRotSmooth = 20f;
-public bool mirrorHeadPitch = false;
+    [Header("Head Pitch Sync")]
+    public Transform cityHead;     // 도시 head 본
+    public Transform stageHead;    // 무대 head 본
 
-    Vector3 lastCityPos;
-    bool hasLast;
+    public enum Axis { X, Y, Z }
+    [Tooltip("도시 head에서 pitch가 걸리는 로컬 축(너는 X)")]
+    public Axis cityPitchAxis = Axis.X;
 
-    float lastCityYaw;
-    bool hasLastYaw;
+    [Tooltip("무대 head에서 pitch를 걸 로컬 축(대부분 X)")]
+    public Axis stagePitchAxis = Axis.X;
+
+    public bool mirrorHeadPitch = false; // pitch 방향 반대면 켜
+    public float headSmooth = 20f;       // 0이면 즉시
+
+    // base pose
+    bool inited;
+    float cityBaseYaw;
+    float stageBaseYaw;
+
+    Quaternion cityHeadBaseLocal;
+    Quaternion stageHeadBaseLocal;
+    bool hasHeadBase;
 
     void OnEnable()
     {
-        hasLast = false;
-        hasLastYaw = false;
+        inited = false;
+        hasHeadBase = false;
     }
 
     void LateUpdate()
     {
-        if (!cityCat || !stageCat || !stageCenter) return;
+        if (!cityCat || !stageCat) return;
 
-        // ===== 1) Position sync (delta-based, city local -> stage local) =====
-        if (!hasLast)
+        if (!inited)
         {
-            lastCityPos = cityCat.position;
-            hasLast = true;
-        }
-        else
-        {
-            Vector3 cityPos = cityCat.position;
-            Vector3 delta = cityPos - lastCityPos;
-            lastCityPos = cityPos;
+            cityBaseYaw  = cityCat.eulerAngles.y;
+            stageBaseYaw = stageCat.eulerAngles.y;
 
-            // --- 도시 고양이 기준 좌우/전후로 분해 ---
-            Vector3 cityRight = cityCat.right;   cityRight.y = 0f; cityRight.Normalize();
-            Vector3 cityFwd   = cityCat.forward; cityFwd.y   = 0f; cityFwd.Normalize();
-
-            float lateral = Vector3.Dot(delta, cityRight) * gainX;  // 도시 기준 좌우
-            float forward = Vector3.Dot(delta, cityFwd)   * gainZ;  // 도시 기준 전후
-
-            // ✅ 요구사항: 무대 고양이는 "앞으로 보고" 있고, 도시 고양이와 좌우 기준이 달라야 함(미러)
-            lateral = -lateral;
-
-            // 추가 토글 반전(옵션)
-            if (invertX) lateral = -lateral;
-            if (invertZ) forward = -forward;
-
-            // --- 무대 기준 축으로 적용(무대 고양이의 right/forward 기준) ---
-            Vector3 stageRight = stageCat.right;   stageRight.y = 0f; stageRight.Normalize();
-            Vector3 stageFwd   = stageCat.forward; stageFwd.y   = 0f; stageFwd.Normalize();
-
-            Vector3 targetPos = stageCat.position + stageRight * lateral + stageFwd * forward;
-
-            // --- 무대 영역 clamp (7.8 x 4.5) ---
-            Vector3 c = stageCenter.position;
-            float halfW = stageWidth * 0.5f;
-            float halfD = stageDepth * 0.5f;
-
-            targetPos.x = Mathf.Clamp(targetPos.x, c.x - halfW, c.x + halfW);
-            targetPos.z = Mathf.Clamp(targetPos.z, c.z - halfD, c.z + halfD);
-            targetPos.y = stageCat.position.y;
-
-            if (posSmooth <= 0f)
+            if (cityHead && stageHead)
             {
-                stageCat.position = targetPos;
+                cityHeadBaseLocal  = cityHead.localRotation;
+                stageHeadBaseLocal = stageHead.localRotation;
+                hasHeadBase = true;
             }
-            else
-            {
-                float t = 1f - Mathf.Exp(-posSmooth * Time.deltaTime);
-                stageCat.position = Vector3.Lerp(stageCat.position, targetPos, t);
-            }
+            inited = true;
         }
 
-        // ===== 2) Rotation sync (Yaw Mirrored: city + => stage -) =====
+        // ===== 1) Body Yaw: "도시의 변화량"을 stage의 base에 반영 (누적X) =====
         if (syncYaw)
         {
             float cityYaw = cityCat.eulerAngles.y;
+            float cityDelta = Mathf.DeltaAngle(cityBaseYaw, cityYaw); // 도시가 base 대비 얼마나 돌았나
 
-            if (!hasLastYaw)
-            {
-                lastCityYaw = cityYaw;
-                hasLastYaw = true;
-            }
+            float applied = mirrorYaw ? -cityDelta : cityDelta;
+            float stageYaw = stageBaseYaw + applied + yawOffset;
+
+            Quaternion target = Quaternion.Euler(0f, stageYaw, 0f);
+
+            if (yawSmooth <= 0f)
+                stageCat.rotation = target;
             else
             {
-                float deltaYaw = Mathf.DeltaAngle(lastCityYaw, cityYaw); // -180~+180
-                lastCityYaw = cityYaw;
-
-                float mirroredDeltaYaw = -deltaYaw;
-
-                float targetYaw = stageCat.eulerAngles.y + mirroredDeltaYaw + yawOffset;
-                Quaternion targetRot = Quaternion.Euler(0f, targetYaw, 0f);
-
-                if (rotSmooth <= 0f)
-                    stageCat.rotation = targetRot;
-                else
-                {
-                    float rt = 1f - Mathf.Exp(-rotSmooth * Time.deltaTime);
-                    stageCat.rotation = Quaternion.Slerp(stageCat.rotation, targetRot, rt);
-                }
+                float t = 1f - Mathf.Exp(-yawSmooth * Time.deltaTime);
+                stageCat.rotation = Quaternion.Slerp(stageCat.rotation, target, t);
             }
         }
 
-        // ===== 3) Head pitch sync (copy cityHead.localRotation -> stageHead.localRotation) =====
-        if (cityHead && stageHead)
+        // ===== 2) Head Pitch: "도시 head의 pitch만" 추출해서 stage head base에 적용 =====
+        if (hasHeadBase)
         {
-            Quaternion src = cityHead.localRotation;
+            Quaternion rel = Quaternion.Inverse(cityHeadBaseLocal) * cityHead.localRotation;
 
-            // 리그 pitch 축이 반대일 때만(대부분 X)
-            if (mirrorHeadPitch)
-                src = new Quaternion(-src.x, src.y, src.z, src.w);
+            float pitchDeg = TwistAngleDeg(rel, AxisVec(cityPitchAxis));
+            pitchDeg = Normalize180(pitchDeg);
 
-            if (headRotSmooth <= 0f)
-                stageHead.localRotation = src;
+            if (mirrorHeadPitch) pitchDeg = -pitchDeg;
+
+            Quaternion pitchRot = Quaternion.AngleAxis(pitchDeg, AxisVec(stagePitchAxis));
+            Quaternion targetHead = stageHeadBaseLocal * pitchRot;
+
+            if (headSmooth <= 0f)
+                stageHead.localRotation = targetHead;
             else
             {
-                float ht = 1f - Mathf.Exp(-headRotSmooth * Time.deltaTime);
-                stageHead.localRotation = Quaternion.Slerp(stageHead.localRotation, src, ht);
+                float t = 1f - Mathf.Exp(-headSmooth * Time.deltaTime);
+                stageHead.localRotation = Quaternion.Slerp(stageHead.localRotation, targetHead, t);
             }
         }
     }
 
-    void OnDrawGizmosSelected()
+    static Vector3 AxisVec(Axis a)
     {
-        if (!stageCenter) return;
-        Gizmos.color = Color.magenta;
-        Gizmos.DrawWireCube(stageCenter.position, new Vector3(stageWidth, 0.05f, stageDepth));
+        switch (a)
+        {
+            case Axis.X: return Vector3.right;
+            case Axis.Y: return Vector3.up;
+            default:     return Vector3.forward;
+        }
+    }
+
+    // q의 axis 방향 twist만 추출한 각도
+    static float TwistAngleDeg(Quaternion q, Vector3 axis)
+    {
+        axis.Normalize();
+        Vector3 v = new Vector3(q.x, q.y, q.z);
+        Vector3 proj = Vector3.Dot(v, axis) * axis;
+
+        Quaternion twist = new Quaternion(proj.x, proj.y, proj.z, q.w);
+        twist = Normalize(twist);
+
+        twist.ToAngleAxis(out float ang, out Vector3 ax);
+        ang = Normalize180(ang);
+
+        if (Vector3.Dot(ax, axis) < 0f) ang = -ang;
+        return ang;
+    }
+
+    static Quaternion Normalize(Quaternion q)
+    {
+        float mag = Mathf.Sqrt(q.x*q.x + q.y*q.y + q.z*q.z + q.w*q.w);
+        if (mag > 1e-8f)
+        {
+            float inv = 1f / mag;
+            q.x *= inv; q.y *= inv; q.z *= inv; q.w *= inv; q.w *= inv;
+        }
+        return q;
+    }
+
+    static float Normalize180(float a)
+    {
+        a %= 360f;
+        if (a > 180f) a -= 360f;
+        if (a < -180f) a += 360f;
+        return a;
     }
 }
