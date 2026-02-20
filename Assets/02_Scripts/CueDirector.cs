@@ -278,7 +278,6 @@ public class CueDirector : MonoBehaviour
             }
         }
 
-
         if (actMgr && actMgr.Current == ActId.Scene3 && catRoot && catEndPoint)
         {
             catRoot.SetPositionAndRotation(catEndPoint.position, catEndPoint.rotation);
@@ -478,6 +477,19 @@ public class CueDirector : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.W))
         {
             EnsureRT();
+
+            // ✅ Scene1: W 누르면 Scene2로 즉시 전환
+            if (actMgr != null && actMgr.Current == ActId.Scene1)
+            {
+                actMgr.SwitchActImmediate(ActId.Scene2);
+                SetAct(IndexFromAct(ActId.Scene2));
+                ApplyDeltaGainForCurrentAct(true);
+                if (deltaSync) deltaSync.RebaseFromCurrent();
+
+                SetCat();        // Scene2 시작 뷰 (원하면 SetWide로)
+                isWide = false;
+                return;
+            }
 
             if (actMgr != null && actMgr.Current == ActId.Scene6)
             {
