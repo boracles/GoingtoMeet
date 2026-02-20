@@ -7,7 +7,7 @@ AnimatorOverrideController:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: CTL_Cat_Domestic_Shorthair
-  m_Controller: {fileID: 9100000, guid: 99936b9f826c3ae4f9e728fc92139e96, type: 2}
+  m_Controller: {fileID: 9100000, guid: 93fd4db76ca0341acabf1ffeeefab83d, type: 2}
   m_Clips:
   - m_OriginalClip: {fileID: 6135301350867649255, guid: 529697c5edf72df46953b0f9a8548137, type: 3}
     m_OverrideClip: {fileID: 6135301350867649255, guid: 529697c5edf72df46953b0f9a8548137, type: 3}
